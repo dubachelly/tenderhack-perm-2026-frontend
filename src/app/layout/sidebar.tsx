@@ -1,0 +1,189 @@
+import { useState } from "react";
+import { Link, useNavigate, useParams } from "react-router";
+import { useQuery } from "@tanstack/react-query";
+import {
+  PanelLeftClose,
+  PanelLeftOpen,
+  Plus,
+  ChevronDown,
+  ChevronRight,
+  FolderOpen,
+} from "lucide-react";
+
+import {
+  getApplicationsOptions,
+  getApplicationsByIdOptions,
+} from "@/shared/api/autogen/@tanstack/react-query.gen";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { useSidebar } from "./sidebar-context";
+
+function ApplicationItem({
+  appId: id,
+  appName,
+  activeAppId,
+  activeQueryId,
+}: {
+  appId: number;
+  appName: string | undefined;
+  activeAppId: string | undefined;
+  activeQueryId: string | undefined;
+}) {
+  const isActive = String(id) === activeAppId;
+  const [open, setOpen] = useState(isActive);
+  const navigate = useNavigate();
+  const { isCollapsed } = useSidebar();
+
+  const { data: fullApp } = useQuery({
+    ...getApplicationsByIdOptions({ path: { id } }),
+    enabled: open,
+  });
+
+  const queries = fullApp?.queries ?? [];
+
+  const handleAddPosition = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    navigate(`/?appId=${id}`);
+  };
+
+  if (isCollapsed) {
+    return (
+      <div
+        className={cn(
+          "flex items-center justify-center p-2 cursor-pointer rounded-sm transition-colors",
+          isActive ? "bg-primary/10 text-primary" : "hover:bg-muted"
+        )}
+        title={appName}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <FolderOpen className="size-4 shrink-0" />
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div
+        className={cn(
+          "flex items-center gap-1 px-2 py-1.5 cursor-pointer rounded-sm transition-colors group",
+          isActive ? "bg-primary/10 text-primary" : "hover:bg-muted"
+        )}
+        onClick={() => setOpen((o) => !o)}
+      >
+        <span className="shrink-0 text-muted-foreground">
+          {open ? (
+            <ChevronDown className="size-3" />
+          ) : (
+            <ChevronRight className="size-3" />
+          )}
+        </span>
+        <span className="flex-1 truncate text-xs font-medium">{appName}</span>
+        <button
+          onClick={handleAddPosition}
+          className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+          title="Добавить позицию"
+        >
+          <Plus className="size-3" />
+        </button>
+      </div>
+      {open && (
+        <div className="ml-4 border-l border-border pl-2 mt-0.5 space-y-0.5">
+          {queries.map((q) => (
+            <Link
+              key={q.id}
+              to={`/applications/${id}/queries/${q.id}`}
+              className={cn(
+                "block truncate text-xs px-2 py-1 rounded-sm transition-colors",
+                String(q.id) === activeQueryId
+                  ? "bg-primary/10 text-primary"
+                  : "text-muted-foreground hover:text-foreground hover:bg-muted"
+              )}
+            >
+              {q.queryText}
+            </Link>
+          ))}
+          <button
+            onClick={handleAddPosition}
+            className="flex items-center gap-1 w-full text-xs px-2 py-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded-sm transition-colors"
+          >
+            <Plus className="size-3" />
+            Добавить позицию
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function Sidebar() {
+  const { isCollapsed, toggle } = useSidebar();
+  const { appId, queryId } = useParams();
+
+  const { data, isLoading } = useQuery(
+    getApplicationsOptions({ query: { limit: 100 } })
+  );
+
+  const applications = data?.data ?? [];
+
+  return (
+    <aside
+      className={cn(
+        "flex flex-col border-r border-border bg-background transition-all duration-300 shrink-0",
+        isCollapsed ? "w-16" : "w-72"
+      )}
+    >
+      {!isCollapsed && (
+        <div className="px-3 py-3 border-b border-border">
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+            Заявки
+          </h2>
+        </div>
+      )}
+
+      <div className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5">
+        {isLoading
+          ? Array.from({ length: 3 }).map((_, i) => (
+              <div
+                key={i}
+                className={cn(
+                  "rounded-sm bg-muted animate-pulse",
+                  isCollapsed ? "h-8 mx-auto w-8" : "h-7"
+                )}
+              />
+            ))
+          : applications.length === 0
+            ? !isCollapsed && (
+                <p className="text-xs text-muted-foreground px-2 py-2">
+                  Нет заявок
+                </p>
+              )
+            : applications.map((app) => (
+                <ApplicationItem
+                  key={app.id}
+                  appId={app.id!}
+                  appName={app.name}
+                  activeAppId={appId}
+                  activeQueryId={queryId}
+                />
+              ))}
+      </div>
+
+      <div className="border-t border-border p-2">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={toggle}
+          className="w-full"
+          title={isCollapsed ? "Развернуть" : "Свернуть"}
+        >
+          {isCollapsed ? (
+            <PanelLeftOpen className="size-4" />
+          ) : (
+            <PanelLeftClose className="size-4" />
+          )}
+        </Button>
+      </div>
+    </aside>
+  );
+}
