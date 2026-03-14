@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ShoppingBasket, X } from "lucide-react";
 
 import {
   getApplicationsByIdOptions,
@@ -32,6 +33,7 @@ export function QueryPage() {
 
   const currentQuery = app?.queries?.find((q) => q.id === numQueryId);
   const queryText = currentQuery?.queryText ?? "";
+  const linkedStes = currentQuery?.stes ?? [];
 
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
     useInfiniteQuery({
@@ -76,8 +78,8 @@ export function QueryPage() {
   };
 
   return (
-    <div className="px-6 py-6 max-w-4xl mx-auto space-y-6">
-      <div className="space-y-2">
+    <div className="px-6 py-6 max-w-7xl mx-auto">
+      <div className="space-y-2 mb-6">
         {app && (
           <p className="text-xs text-muted-foreground">
             Заявка:{" "}
@@ -92,24 +94,67 @@ export function QueryPage() {
         />
       </div>
 
-      {queryText ? (
-        <SteResultsList
-          data={data}
-          isLoading={isLoading}
-          isFetchingNextPage={isFetchingNextPage}
-          hasNextPage={!!hasNextPage}
-          fetchNextPage={fetchNextPage}
-          queryData={currentQuery}
-          appId={numAppId}
-          queryId={numQueryId}
-          onLink={handleLink}
-          linkingId={linkingId}
-        />
-      ) : (
-        <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">
-          Загрузка...
+      <div className="flex gap-6 items-start">
+        <div className="flex-1 min-w-0">
+          {queryText ? (
+            <SteResultsList
+              data={data}
+              isLoading={isLoading}
+              isFetchingNextPage={isFetchingNextPage}
+              hasNextPage={!!hasNextPage}
+              fetchNextPage={fetchNextPage}
+              queryData={currentQuery}
+              appId={numAppId}
+              queryId={numQueryId}
+              onLink={handleLink}
+              linkingId={linkingId}
+            />
+          ) : (
+            <div className="flex items-center justify-center py-20 text-muted-foreground text-sm">
+              Загрузка...
+            </div>
+          )}
         </div>
-      )}
+
+        <div className="w-72 shrink-0 sticky top-6">
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div className="flex items-center gap-2 px-4 py-3 border-b">
+              <ShoppingBasket className="size-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Привязанные СТЕ</span>
+              {linkedStes.length > 0 && (
+                <span className="ml-auto text-xs text-muted-foreground">
+                  {linkedStes.length}
+                </span>
+              )}
+            </div>
+            <div className="p-2">
+              {linkedStes.length === 0 ? (
+                <p className="text-xs text-muted-foreground text-center py-6 px-2">
+                  Нет привязанных СТЕ
+                </p>
+              ) : (
+                <ul className="space-y-1">
+                  {linkedStes.map((ste) => (
+                    <li
+                      key={ste.id}
+                      className="flex items-start gap-2 rounded-md px-2 py-2 text-xs hover:bg-muted/50"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium truncate" title={ste.steName ?? undefined}>
+                          {ste.steName ?? "—"}
+                        </p>
+                        {ste.steCategory && (
+                          <p className="text-muted-foreground truncate">{ste.steCategory}</p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
 
       <ScrollToTopButton scrollContainerRef={scrollRef} />
     </div>

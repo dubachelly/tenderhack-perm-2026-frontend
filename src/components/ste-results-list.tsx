@@ -1,22 +1,22 @@
-import { useCallback } from "react";
-import type { InfiniteData } from "@tanstack/react-query";
-import type { GetSearchItemsResponse } from "@/shared/api/autogen/types.gen";
-import type { ApplicationQueryFull } from "@/shared/api/autogen/types.gen";
-import { SteCard } from "./ste-card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useIntersectionObserver } from "@/hooks/use-intersection-observer";
+import { useCallback } from "react"
+import type { InfiniteData } from "@tanstack/react-query"
+import type { GetSearchItemsResponse } from "@/shared/api/autogen/types.gen"
+import type { ApplicationQueryFull } from "@/shared/api/autogen/types.gen"
+import { SteCard } from "./ste-card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { useIntersectionObserver } from "@/hooks/use-intersection-observer"
 
 interface SteResultsListProps {
-  data: InfiniteData<GetSearchItemsResponse> | undefined;
-  isLoading: boolean;
-  isFetchingNextPage: boolean;
-  hasNextPage: boolean;
-  fetchNextPage: () => void;
-  queryData: ApplicationQueryFull | undefined;
-  appId: number;
-  queryId: number;
-  onLink: (steId: number, rank: number) => void;
-  linkingId: number | null;
+  data: InfiniteData<GetSearchItemsResponse> | undefined
+  isLoading: boolean
+  isFetchingNextPage: boolean
+  hasNextPage: boolean
+  fetchNextPage: () => void
+  queryData: ApplicationQueryFull | undefined
+  appId: number
+  queryId: number
+  onLink: (steId: number, rank: number) => void
+  linkingId: number | null
 }
 
 export function SteResultsList({
@@ -29,17 +29,17 @@ export function SteResultsList({
   onLink,
   linkingId,
 }: SteResultsListProps) {
-  const linkedSteIds = new Set(queryData?.stes?.map((s) => s.steId));
+  const linkedSteIds = new Set(queryData?.stes?.map((s) => s.steId))
 
   const handleIntersect = useCallback(() => {
-    if (hasNextPage && !isFetchingNextPage) fetchNextPage();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+    if (hasNextPage && !isFetchingNextPage) fetchNextPage()
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const sentinelRef = useIntersectionObserver(handleIntersect, {
     rootMargin: "200px",
-  });
+  })
 
-  const items = data?.pages.flatMap((p) => p.data ?? []) ?? [];
+  const items = data?.pages.flatMap((p) => p.data ?? []) ?? []
 
   if (isLoading) {
     return (
@@ -48,16 +48,16 @@ export function SteResultsList({
           <Skeleton key={i} className="h-32 w-full" />
         ))}
       </div>
-    );
+    )
   }
 
   if (!isLoading && items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
         <p className="text-sm">Ничего не найдено</p>
-        <p className="text-xs mt-1">Попробуйте изменить поисковый запрос</p>
+        <p className="mt-1 text-xs">Попробуйте изменить поисковый запрос</p>
       </div>
-    );
+    )
   }
 
   return (
@@ -66,7 +66,11 @@ export function SteResultsList({
         <SteCard
           key={item.ste_id}
           item={item}
-          isLinked={!!item.ste_id && linkedSteIds.has(item.ste_id)}
+          isLinked={
+            item.ste_id !== undefined &&
+            // @ts-expect-error тут косяк на бэке, костылим пока
+            linkedSteIds.has(Number.parseInt(item.ste_id as string))
+          }
           isPending={linkingId === item.ste_id}
           onLink={onLink}
         />
@@ -80,10 +84,10 @@ export function SteResultsList({
         </div>
       )}
       {!hasNextPage && items.length > 0 && (
-        <p className="text-center text-xs text-muted-foreground py-4">
+        <p className="py-4 text-center text-xs text-muted-foreground">
           Все результаты загружены
         </p>
       )}
     </div>
-  );
+  )
 }
