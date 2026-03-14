@@ -248,7 +248,11 @@ export function QueryPage() {
         )}
       </div>
 
-      <LinkedContractsSheet contracts={linkedContracts} />
+      <LinkedContractsSheet
+        contracts={linkedContracts}
+        appName={app?.name ?? ""}
+        queryText={queryText}
+      />
 
       <ScrollToTopButton scrollContainerRef={scrollRef} />
     </div>
