@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useParams } from "react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   PanelLeftClose,
   PanelLeftOpen,
@@ -8,11 +8,16 @@ import {
   ChevronDown,
   ChevronRight,
   FolderOpen,
+  Trash2,
 } from "lucide-react";
 
 import {
   getApplicationsOptions,
   getApplicationsByIdOptions,
+  getApplicationsQueryKey,
+  getApplicationsByIdQueryKey,
+  deleteApplicationsByIdMutation,
+  deleteApplicationsByAppIdQueriesByQueryIdMutation,
 } from "@/shared/api/autogen/@tanstack/react-query.gen";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -33,6 +38,7 @@ function ApplicationItem({
   const [open, setOpen] = useState(isActive);
   const navigate = useNavigate();
   const { isCollapsed } = useSidebar();
+  const queryClient = useQueryClient();
 
   const { data: fullApp } = useQuery({
     ...getApplicationsByIdOptions({ path: { id } }),
@@ -41,10 +47,40 @@ function ApplicationItem({
 
   const queries = fullApp?.queries ?? [];
 
+  const deleteApp = useMutation({
+    ...deleteApplicationsByIdMutation(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: getApplicationsQueryKey() });
+      if (isActive) navigate("/");
+    },
+  });
+
+  const deleteQuery = useMutation({
+    ...deleteApplicationsByAppIdQueriesByQueryIdMutation(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: getApplicationsByIdQueryKey({ path: { id } }),
+      });
+    },
+  });
+
   const handleAddPosition = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     navigate(`/?appId=${id}`);
+  };
+
+  const handleDeleteApp = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    deleteApp.mutate({ path: { id } });
+  };
+
+  const handleDeleteQuery = (e: React.MouseEvent, queryId: number) => {
+    e.preventDefault();
+    e.stopPropagation();
+    deleteQuery.mutate({ path: { appId: id, queryId } });
+    if (String(queryId) === activeQueryId) navigate(`/applications/${id}`);
   };
 
   if (isCollapsed) {
@@ -86,22 +122,42 @@ function ApplicationItem({
         >
           <Plus className="size-3" />
         </button>
+        <button
+          onClick={handleDeleteApp}
+          className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+          title="Удалить заявку"
+          disabled={deleteApp.isPending}
+        >
+          <Trash2 className="size-3" />
+        </button>
       </div>
       {open && (
         <div className="ml-4 border-l border-border pl-2 mt-0.5 space-y-0.5">
           {queries.map((q) => (
-            <Link
+            <div
               key={q.id}
-              to={`/applications/${id}/queries/${q.id}`}
               className={cn(
-                "block truncate text-xs px-2 py-1 rounded-sm transition-colors",
+                "flex items-center group/query rounded-sm transition-colors",
                 String(q.id) === activeQueryId
                   ? "bg-primary/10 text-primary"
                   : "text-muted-foreground hover:text-foreground hover:bg-muted"
               )}
             >
-              {q.queryText}
-            </Link>
+              <Link
+                to={`/applications/${id}/queries/${q.id}`}
+                className="flex-1 truncate text-xs px-2 py-1"
+              >
+                {q.queryText}
+              </Link>
+              <button
+                onClick={(e) => handleDeleteQuery(e, q.id!)}
+                className="shrink-0 opacity-0 group-hover/query:opacity-100 transition-opacity pr-2 text-muted-foreground hover:text-destructive"
+                title="Удалить запрос"
+                disabled={deleteQuery.isPending}
+              >
+                <Trash2 className="size-3" />
+              </button>
+            </div>
           ))}
           <button
             onClick={handleAddPosition}
