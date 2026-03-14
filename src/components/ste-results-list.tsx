@@ -64,7 +64,7 @@ export function SteResultsList({
     <div className="space-y-3">
       {items.map((item) => (
         <SteCard
-          key={item.id}
+          key={item.ste_id}
           item={item}
           isLinked={!!item.ste_id && linkedSteIds.has(item.ste_id)}
           isPending={linkingId === item.ste_id}

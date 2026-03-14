@@ -97,14 +97,20 @@ export type ApplicationFull = Application & {
     queries?: Array<ApplicationQueryFull>;
 };
 
-export type SearchItem = {
+export type SearchContractItem = {
     id?: number;
     contract_id?: number;
-    ste_id?: number | null;
     ste_item_name?: string | null;
     quantity?: string | null;
     unit?: string | null;
     unit_price?: string | null;
+};
+
+/**
+ * СТЕ с вложенным списком контрактов, в которых она встречается
+ */
+export type SearchSteGroup = {
+    ste_id?: number;
     ste_name?: string | null;
     ste_category?: string | null;
     ste_manufacturer?: string | null;
@@ -113,6 +119,7 @@ export type SearchItem = {
      * Релевантность полнотекстового поиска
      */
     rank?: number;
+    contracts?: Array<SearchContractItem>;
 };
 
 export type GetHealthData = {
@@ -735,7 +742,7 @@ export type GetSearchItemsResponses = {
      * OK
      */
     200: {
-        data?: Array<SearchItem>;
+        data?: Array<SearchSteGroup>;
         total?: number;
         page?: number;
         limit?: number;
