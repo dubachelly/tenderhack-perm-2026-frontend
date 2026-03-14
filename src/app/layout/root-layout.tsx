@@ -1,35 +1,36 @@
-import { Outlet, useNavigate } from "react-router"
-import { Plus, History } from "lucide-react"
+import { Outlet, useNavigate, useLocation } from "react-router"
+import { Home, History } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 export function RootLayout() {
   const navigate = useNavigate()
+  const location = useLocation()
 
   return (
-    <div className="h-svh overflow-hidden">
-      <main className="h-full overflow-y-auto">
-        <Outlet />
-      </main>
-
-      <div className="fixed right-6 bottom-20 z-50 flex flex-col items-center gap-3">
+    <div className="flex h-svh overflow-hidden">
+      <aside className="flex w-14 flex-col items-center gap-2 border-r bg-background py-4">
         <Button
           size="icon"
-          variant="secondary"
+          variant={location.pathname === "/" ? "default" : "ghost"}
+          onClick={() => navigate("/")}
+          className="size-10"
+          title="Главная"
+        >
+          <Home className="size-5" />
+        </Button>
+        <Button
+          size="icon"
+          variant={location.pathname === "/history" ? "default" : "ghost"}
           onClick={() => navigate("/history")}
-          className="size-10 rounded-full shadow-md"
+          className="size-10"
           title="История заявок"
         >
-          <History className="size-4" />
+          <History className="size-5" />
         </Button>
-        <Button
-          size="icon"
-          onClick={() => navigate("/")}
-          className="size-14 rounded-full shadow-lg"
-          title="Новая заявка"
-        >
-          <Plus className="size-7" />
-        </Button>
-      </div>
+      </aside>
+      <main className="flex-1 overflow-y-auto">
+        <Outlet />
+      </main>
     </div>
   )
 }

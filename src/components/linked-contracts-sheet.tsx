@@ -107,7 +107,7 @@ export function LinkedContractsSheet({
 
   return (
     <Sheet>
-      <SheetTrigger className="fixed bottom-0 left-0 right-0 z-40 flex h-14 cursor-pointer items-center gap-3 border-t bg-background px-6 shadow-lg transition-colors hover:bg-accent">
+      <SheetTrigger className="fixed bottom-0 left-14 right-0 z-40 flex h-14 cursor-pointer items-center gap-3 border-t bg-background px-6 shadow-lg transition-colors hover:bg-accent">
         <div className="absolute left-1/2 top-2 h-1 w-10 -translate-x-1/2 rounded-full bg-muted-foreground/30" />
         <ShoppingBasket className="size-4 text-muted-foreground" />
         <span className="text-sm font-medium">Привязанные контракты</span>
