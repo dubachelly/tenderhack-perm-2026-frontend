@@ -119,6 +119,7 @@ function ApplicationItem({
 export function Sidebar() {
   const { isCollapsed, toggle } = useSidebar();
   const { appId, queryId } = useParams();
+  const navigate = useNavigate();
 
   const { data, isLoading } = useQuery(
     getApplicationsOptions({ query: { limit: 100 } })
@@ -169,7 +170,16 @@ export function Sidebar() {
               ))}
       </div>
 
-      <div className="border-t border-border p-2">
+      <div className="border-t border-border p-2 space-y-2">
+        {isCollapsed ? (
+          <Button variant="default" size="icon" className="w-full" title="Создать новую заявку" onClick={() => navigate("/")}>
+            <Plus className="size-4" />
+          </Button>
+        ) : (
+          <Button variant="default" className="w-full" onClick={() => navigate("/")}>
+            <Plus className="size-4 mr-2" />Новая заявка
+          </Button>
+        )}
         <Button
           variant="ghost"
           size="icon"
