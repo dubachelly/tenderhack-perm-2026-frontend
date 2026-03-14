@@ -80,8 +80,8 @@ export function QueryPage() {
         <Breadcrumb>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to={`/applications/${numAppId}`}>{app?.name ?? "Заявка"}</Link>
+              <BreadcrumbLink render={<Link to={`/applications/${numAppId}`} />}>
+                {app?.name ?? "Заявка"}
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />

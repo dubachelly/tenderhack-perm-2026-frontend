@@ -11,9 +11,7 @@ import {
   deleteApplicationsByIdMutation,
   deleteApplicationsByAppIdQueriesByQueryIdMutation,
 } from "@/shared/api/autogen/@tanstack/react-query.gen";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 
 function ApplicationRow({ appId: id, appName }: { appId: number; appName: string | undefined }) {
   const [open, setOpen] = useState(false);

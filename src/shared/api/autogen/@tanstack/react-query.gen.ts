@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { deleteApplicationsByAppIdQueriesByQueryId, deleteApplicationsByAppIdQueriesByQueryIdContractsByContractId, deleteApplicationsById, getApplications, getApplicationsById, getContracts, getContractsBuyerRegions, getContractsById, getContractsByIdItems, getContractsSupplierRegions, getHealth, getSearchItems, getSte, getSteById, getSteCategories, type Options, postApplications, postApplicationsByAppIdQueriesByQueryIdContracts, postApplicationsByIdQueries } from '../sdk.gen';
-import type { DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdData, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdError, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdResponse, DeleteApplicationsByAppIdQueriesByQueryIdData, DeleteApplicationsByAppIdQueriesByQueryIdError, DeleteApplicationsByAppIdQueriesByQueryIdResponse, DeleteApplicationsByIdData, DeleteApplicationsByIdError, DeleteApplicationsByIdResponse, GetApplicationsByIdData, GetApplicationsByIdError, GetApplicationsByIdResponse, GetApplicationsData, GetApplicationsError, GetApplicationsResponse, GetContractsBuyerRegionsData, GetContractsBuyerRegionsError, GetContractsBuyerRegionsResponse, GetContractsByIdData, GetContractsByIdError, GetContractsByIdItemsData, GetContractsByIdItemsError, GetContractsByIdItemsResponse, GetContractsByIdResponse, GetContractsData, GetContractsError, GetContractsResponse, GetContractsSupplierRegionsData, GetContractsSupplierRegionsError, GetContractsSupplierRegionsResponse, GetHealthData, GetHealthResponse, GetSearchItemsData, GetSearchItemsError, GetSearchItemsResponse, GetSteByIdData, GetSteByIdError, GetSteByIdResponse, GetSteCategoriesData, GetSteCategoriesError, GetSteCategoriesResponse, GetSteData, GetSteError, GetSteResponse, PostApplicationsByAppIdQueriesByQueryIdContractsData, PostApplicationsByAppIdQueriesByQueryIdContractsError, PostApplicationsByAppIdQueriesByQueryIdContractsResponse, PostApplicationsByIdQueriesData, PostApplicationsByIdQueriesError, PostApplicationsByIdQueriesResponse, PostApplicationsData, PostApplicationsError, PostApplicationsResponse } from '../types.gen';
+import { deleteApplicationsByAppIdQueriesByQueryId, deleteApplicationsByAppIdQueriesByQueryIdContractsByContractId, deleteApplicationsById, getApplications, getApplicationsById, getContracts, getContractsBuyerRegions, getContractsById, getContractsByIdItems, getContractsSupplierRegions, getHealth, getSearchItems, getSearchSteBySteIdContracts, getSte, getSteById, getSteCategories, type Options, postApplications, postApplicationsByAppIdQueriesByQueryIdContracts, postApplicationsByIdQueries } from '../sdk.gen';
+import type { DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdData, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdError, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdResponse, DeleteApplicationsByAppIdQueriesByQueryIdData, DeleteApplicationsByAppIdQueriesByQueryIdError, DeleteApplicationsByAppIdQueriesByQueryIdResponse, DeleteApplicationsByIdData, DeleteApplicationsByIdError, DeleteApplicationsByIdResponse, GetApplicationsByIdData, GetApplicationsByIdError, GetApplicationsByIdResponse, GetApplicationsData, GetApplicationsError, GetApplicationsResponse, GetContractsBuyerRegionsData, GetContractsBuyerRegionsError, GetContractsBuyerRegionsResponse, GetContractsByIdData, GetContractsByIdError, GetContractsByIdItemsData, GetContractsByIdItemsError, GetContractsByIdItemsResponse, GetContractsByIdResponse, GetContractsData, GetContractsError, GetContractsResponse, GetContractsSupplierRegionsData, GetContractsSupplierRegionsError, GetContractsSupplierRegionsResponse, GetHealthData, GetHealthResponse, GetSearchItemsData, GetSearchItemsError, GetSearchItemsResponse, GetSearchSteBySteIdContractsData, GetSearchSteBySteIdContractsError, GetSearchSteBySteIdContractsResponse, GetSteByIdData, GetSteByIdError, GetSteByIdResponse, GetSteCategoriesData, GetSteCategoriesError, GetSteCategoriesResponse, GetSteData, GetSteError, GetSteResponse, PostApplicationsByAppIdQueriesByQueryIdContractsData, PostApplicationsByAppIdQueriesByQueryIdContractsError, PostApplicationsByAppIdQueriesByQueryIdContractsResponse, PostApplicationsByIdQueriesData, PostApplicationsByIdQueriesError, PostApplicationsByIdQueriesResponse, PostApplicationsData, PostApplicationsError, PostApplicationsResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -452,7 +452,7 @@ export const deleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdMutat
 export const getSearchItemsQueryKey = (options: Options<GetSearchItemsData>) => createQueryKey('getSearchItems', options);
 
 /**
- * Полнотекстовый поиск позиций контрактов по СТЕ
+ * Полнотекстовый поиск СТЕ (включая без контрактов)
  */
 export const getSearchItemsOptions = (options: Options<GetSearchItemsData>) => queryOptions<GetSearchItemsResponse, GetSearchItemsError, GetSearchItemsResponse, ReturnType<typeof getSearchItemsQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -470,7 +470,7 @@ export const getSearchItemsOptions = (options: Options<GetSearchItemsData>) => q
 export const getSearchItemsInfiniteQueryKey = (options: Options<GetSearchItemsData>): QueryKey<Options<GetSearchItemsData>> => createQueryKey('getSearchItems', options, true);
 
 /**
- * Полнотекстовый поиск позиций контрактов по СТЕ
+ * Полнотекстовый поиск СТЕ (включая без контрактов)
  */
 export const getSearchItemsInfiniteOptions = (options: Options<GetSearchItemsData>) => infiniteQueryOptions<GetSearchItemsResponse, GetSearchItemsError, InfiniteData<GetSearchItemsResponse>, QueryKey<Options<GetSearchItemsData>>, number | Pick<QueryKey<Options<GetSearchItemsData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
 // @ts-ignore
@@ -492,4 +492,22 @@ export const getSearchItemsInfiniteOptions = (options: Options<GetSearchItemsDat
         return data;
     },
     queryKey: getSearchItemsInfiniteQueryKey(options)
+});
+
+export const getSearchSteBySteIdContractsQueryKey = (options: Options<GetSearchSteBySteIdContractsData>) => createQueryKey('getSearchSteBySteIdContracts', options);
+
+/**
+ * Список контрактов, содержащих данную СТЕ
+ */
+export const getSearchSteBySteIdContractsOptions = (options: Options<GetSearchSteBySteIdContractsData>) => queryOptions<GetSearchSteBySteIdContractsResponse, GetSearchSteBySteIdContractsError, GetSearchSteBySteIdContractsResponse, ReturnType<typeof getSearchSteBySteIdContractsQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getSearchSteBySteIdContracts({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getSearchSteBySteIdContractsQueryKey(options)
 });

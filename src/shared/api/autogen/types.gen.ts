@@ -23,16 +23,10 @@ export type Contract = {
     id?: number;
     procurementName?: string;
     procurementMethod?: string | null;
-    /**
-     * numeric
-     */
-    initialContractValue?: string | null;
-    /**
-     * numeric
-     */
-    contractValueAfterSigning?: string | null;
-    reductionPercent?: string | null;
-    vatRate?: string | null;
+    initialContractValue?: number | null;
+    contractValueAfterSigning?: number | null;
+    reductionPercent?: number | null;
+    vatRate?: number | null;
     contractSigningDate?: string | null;
     buyerInn?: string | null;
     buyerRegion?: string | null;
@@ -44,9 +38,9 @@ export type ContractItemWithSte = {
     id?: number;
     steId?: number | null;
     steItemName?: string | null;
-    quantity?: string | null;
+    quantity?: number | null;
     unit?: string | null;
-    unitPrice?: string | null;
+    unitPrice?: number | null;
     steName?: string | null;
     steCategory?: string | null;
     steManufacturer?: string | null;
@@ -75,10 +69,10 @@ export type ApplicationQueryContractWithContract = {
     contractId?: number;
     procurementName?: string | null;
     procurementMethod?: string | null;
-    initialContractValue?: string | null;
-    contractValueAfterSigning?: string | null;
-    reductionPercent?: string | null;
-    vatRate?: string | null;
+    initialContractValue?: number | null;
+    contractValueAfterSigning?: number | null;
+    reductionPercent?: number | null;
+    vatRate?: number | null;
     contractSigningDate?: string | null;
     buyerInn?: string | null;
     buyerRegion?: string | null;
@@ -97,17 +91,8 @@ export type ApplicationFull = Application & {
     queries?: Array<ApplicationQueryFull>;
 };
 
-export type SearchContractItem = {
-    id?: number;
-    contract_id?: number;
-    ste_item_name?: string | null;
-    quantity?: string | null;
-    unit?: string | null;
-    unit_price?: string | null;
-};
-
 /**
- * СТЕ с вложенным списком контрактов, в которых она встречается
+ * СТЕ с массивом id контрактов, в которых она встречается (пустой массив если контрактов нет)
  */
 export type SearchSteGroup = {
     ste_id?: number;
@@ -119,7 +104,33 @@ export type SearchSteGroup = {
      * Релевантность полнотекстового поиска
      */
     rank?: number;
-    contracts?: Array<SearchContractItem>;
+    /**
+     * Массив id контрактов, содержащих данную СТЕ
+     */
+    contract_ids?: Array<number>;
+};
+
+/**
+ * Строка контракта с данными контракта и позиции СТЕ
+ */
+export type SteContractRow = {
+    contract_id?: number;
+    procurement_name?: string;
+    procurement_method?: string | null;
+    initial_contract_value?: number | null;
+    contract_value_after_signing?: number | null;
+    reduction_percent?: number | null;
+    vat_rate?: number | null;
+    contract_signing_date?: string | null;
+    buyer_inn?: string | null;
+    buyer_region?: string | null;
+    supplier_inn?: string | null;
+    supplier_region?: string | null;
+    item_id?: number;
+    ste_item_name?: string | null;
+    quantity?: number | null;
+    unit?: string | null;
+    unit_price?: number | null;
 };
 
 export type GetHealthData = {
@@ -749,3 +760,36 @@ export type GetSearchItemsResponses = {
 };
 
 export type GetSearchItemsResponse = GetSearchItemsResponses[keyof GetSearchItemsResponses];
+
+export type GetSearchSteBySteIdContractsData = {
+    body?: never;
+    path: {
+        steId: number;
+    };
+    query?: never;
+    url: '/search/ste/{steId}/contracts';
+};
+
+export type GetSearchSteBySteIdContractsErrors = {
+    /**
+     * Error
+     */
+    400: Error;
+    /**
+     * Error
+     */
+    500: Error;
+};
+
+export type GetSearchSteBySteIdContractsError = GetSearchSteBySteIdContractsErrors[keyof GetSearchSteBySteIdContractsErrors];
+
+export type GetSearchSteBySteIdContractsResponses = {
+    /**
+     * Контракты с позициями для данной СТЕ
+     */
+    200: {
+        data?: Array<SteContractRow>;
+    };
+};
+
+export type GetSearchSteBySteIdContractsResponse = GetSearchSteBySteIdContractsResponses[keyof GetSearchSteBySteIdContractsResponses];
