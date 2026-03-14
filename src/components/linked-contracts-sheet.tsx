@@ -1,11 +1,5 @@
 import { useState } from "react"
-import {
-  ShoppingBasket,
-  Download,
-  TableOfContentsIcon,
-  DownloadIcon,
-  Trash2,
-} from "lucide-react"
+import { Download, TableOfContentsIcon, Trash2 } from "lucide-react"
 import {
   Sheet,
   SheetContent,
@@ -127,8 +121,8 @@ export function LinkedContractsSheet({
       <SheetContent side="bottom" className="max-h-[60vh]">
         <SheetHeader className="border-b pb-3">
           <SheetTitle className="flex items-center gap-2">
-            <ShoppingBasket className="size-4 text-muted-foreground" />
-            Привязанные контракты
+            <TableOfContentsIcon className="size-4 text-muted-foreground" />
+            Отчёт
             {contracts.length > 0 && (
               <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
                 {contracts.length}
@@ -143,7 +137,7 @@ export function LinkedContractsSheet({
                 onClick={handleDownload}
               >
                 <Download className="size-3.5" />
-                {isDownloading ? "Скачивание..." : "Скачать отчет"}
+                {isDownloading ? "Скачивание..." : "Скачать"}
               </Button>
             )}
           </SheetTitle>

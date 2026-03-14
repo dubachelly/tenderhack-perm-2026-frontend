@@ -27,6 +27,7 @@ import { parseCharacteristics } from "@/lib/utils"
 import { MultiSelect } from "@/components/multi-select"
 import { DateRangePicker, toISODate } from "@/components/date-range-picker"
 import type { DateRange } from "@/components/date-range-picker"
+import { Badge } from "./ui/badge"
 
 interface SteDetailModalProps {
   open: boolean
@@ -76,7 +77,7 @@ function ContractTable({
   linkingId: number | null
 }) {
   if (contracts.length === 0) {
-    return <p className="py-2 text-xs text-muted-foreground">Нет контрактов</p>
+    return <p className="py-2 text-xs text-muted-foreground">Нет закупок</p>
   }
 
   return (
@@ -84,19 +85,13 @@ function ContractTable({
       <TableHeader>
         <TableRow className="text-muted-foreground">
           <TableHead className="sticky left-0 z-10 w-8 bg-background" />
-          <TableHead className="min-w-48 font-normal">
-            Наименование закупки
-          </TableHead>
+          <TableHead className="min-w-48 font-normal">Наименование</TableHead>
           <TableHead className="text-right font-normal">НДС</TableHead>
-          <TableHead className="text-right font-normal">
-            Дата заключения
-          </TableHead>
+          <TableHead className="text-right font-normal">Дата</TableHead>
           <TableHead className="font-normal">Регион заказчика</TableHead>
           <TableHead className="font-normal">Регион поставщика</TableHead>
           <TableHead className="text-right font-normal">Количество</TableHead>
-          <TableHead className="text-right font-normal">
-            Цена за ед., ₽
-          </TableHead>
+          <TableHead className="text-right font-normal">Цена за ед.</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -247,14 +242,24 @@ export function SteDetailModal({
             {item.ste_name ?? "—"}
           </DialogTitle>
           <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-            {item.ste_category && <span>{item.ste_category}</span>}
-            {item.ste_manufacturer && <span>{item.ste_manufacturer}</span>}
+            {item.ste_category && <Badge>{item.ste_category}</Badge>}
+            {item.ste_manufacturer && (
+              <Badge>
+                {item.ste_manufacturer.replace(
+                  /общество с ограниченной ответственностью/gi,
+                  "ООО"
+                )}
+              </Badge>
+            )}
           </div>
         </DialogHeader>
 
-        <ScrollArea className="flex-1 overflow-auto">
+        <ScrollArea
+          className="flex-1 overflow-auto"
+          style={{ scrollbarGutter: "stable" }}
+        >
           <div className="space-y-6 p-6">
-            {characteristics.length > 0 && (
+            {characteristics.length > 0 ? (
               <section>
                 <h3 className="mb-3 text-xs font-medium tracking-wide text-muted-foreground uppercase">
                   Характеристики
@@ -275,6 +280,8 @@ export function SteDetailModal({
                   ))}
                 </dl>
               </section>
+            ) : (
+              <span className="text-muted-foreground">Нет характеристик</span>
             )}
 
             {isLoading ? (
@@ -286,7 +293,7 @@ export function SteDetailModal({
               <>
                 <section>
                   <h3 className="mb-3 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                    Выбранные контракты
+                    Выбранные закупки
                   </h3>
                   <ContractTable
                     contracts={selectedContracts}
@@ -300,34 +307,40 @@ export function SteDetailModal({
                 <section>
                   <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
                     <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                      Остальные контракты
+                      Остальные закупки
                     </h3>
                     {otherContracts.length > 0 && (
                       <div className="ml-auto flex flex-wrap items-center gap-2">
                         <SlidersHorizontal className="size-3.5 text-muted-foreground" />
-                        <div className="w-44">
-                          <MultiSelect
-                            items={supplierOptions}
-                            value={supplierFilter}
-                            onValueChange={setSupplierFilter}
-                            placeholder="Регион поставщика"
-                          />
-                        </div>
-                        <div className="w-44">
-                          <MultiSelect
-                            items={methodOptions}
-                            value={methodFilter}
-                            onValueChange={setMethodFilter}
-                            placeholder="Способ закупки"
-                          />
-                        </div>
-                        <div className="w-48">
-                          <DateRangePicker
-                            value={dateRange}
-                            onChange={setDateRange}
-                            placeholder="Период заключения"
-                          />
-                        </div>
+                        {supplierOptions.length > 1 && (
+                          <div className="w-44">
+                            <MultiSelect
+                              items={supplierOptions}
+                              value={supplierFilter}
+                              onValueChange={setSupplierFilter}
+                              placeholder="Регион поставщика"
+                            />
+                          </div>
+                        )}
+                        {methodOptions.length > 1 && (
+                          <div className="w-44">
+                            <MultiSelect
+                              items={methodOptions}
+                              value={methodFilter}
+                              onValueChange={setMethodFilter}
+                              placeholder="Способ закупки"
+                            />
+                          </div>
+                        )}
+                        {otherContracts.length > 1 && (
+                          <div className="w-48">
+                            <DateRangePicker
+                              value={dateRange}
+                              onChange={setDateRange}
+                              placeholder="Период заключения"
+                            />
+                          </div>
+                        )}
                         {hasActiveFilters && (
                           <Button
                             variant="ghost"

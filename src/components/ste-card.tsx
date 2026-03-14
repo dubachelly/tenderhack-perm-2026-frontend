@@ -13,11 +13,19 @@ interface SteCardProps {
   linkingId: number | null
 }
 
-export function SteCard({ item, linkedContractIds, onLink, onUnlink, linkingId }: SteCardProps) {
+export function SteCard({
+  item,
+  linkedContractIds,
+  onLink,
+  onUnlink,
+  linkingId,
+}: SteCardProps) {
   const [modalOpen, setModalOpen] = useState(false)
 
   const contractIds = item.contract_item_ids ?? []
-  const selectedCount = contractIds.filter((id) => linkedContractIds.has(id)).length
+  const selectedCount = contractIds.filter((id) =>
+    linkedContractIds.has(id)
+  ).length
   const totalCount = contractIds.length
   const hasSelected = selectedCount > 0
 
@@ -26,8 +34,8 @@ export function SteCard({ item, linkedContractIds, onLink, onUnlink, linkingId }
       <Card
         size="sm"
         className={cn(
-          "cursor-pointer hover:bg-accent/50 transition-colors",
-          hasSelected && "ring-1 ring-primary/60 bg-primary/5"
+          "cursor-pointer transition-colors hover:bg-accent/50",
+          hasSelected && "bg-primary/5 ring-1 ring-primary/60"
         )}
         onClick={() => setModalOpen(true)}
       >
@@ -38,15 +46,23 @@ export function SteCard({ item, linkedContractIds, onLink, onUnlink, linkingId }
               <Badge variant="secondary">{item.ste_category}</Badge>
             )}
             {item.ste_manufacturer && (
-              <Badge variant="outline">{item.ste_manufacturer.replace(/общество с ограниченной ответственностью/gi, "ООО")}</Badge>
+              <Badge variant="outline">
+                {item.ste_manufacturer.replace(
+                  /общество с ограниченной ответственностью/gi,
+                  "ООО"
+                )}
+              </Badge>
             )}
             <span
               className={cn(
                 "text-xs",
-                hasSelected ? "text-primary font-medium" : "text-muted-foreground"
+                hasSelected
+                  ? "font-medium text-primary"
+                  : "text-muted-foreground",
+                "ml-auto"
               )}
             >
-              Выбрано {selectedCount}/{totalCount} контрактов
+              {selectedCount}/{totalCount}
             </span>
           </div>
         </CardHeader>
