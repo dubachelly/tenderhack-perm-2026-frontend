@@ -195,7 +195,12 @@ export type GetSteResponse = GetSteResponses[keyof GetSteResponses];
 export type GetSteCategoriesData = {
     body?: never;
     path?: never;
-    query?: never;
+    query?: {
+        /**
+         * Полнотекстовый поиск по имени СТЕ — вернёт только категории из найденных СТЕ
+         */
+        query?: string;
+    };
     url: '/ste/categories';
 };
 
@@ -801,6 +806,10 @@ export type GetSearchItemsResponses = {
         total?: number;
         page?: number;
         limit?: number;
+        /**
+         * Уникальные категории из текущей страницы результатов
+         */
+        categories?: Array<string>;
     };
 };
 

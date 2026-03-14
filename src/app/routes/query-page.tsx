@@ -7,9 +7,9 @@ import {
   getApplicationsByIdOptions,
   getApplicationsByIdQueryKey,
   getSearchItemsInfiniteOptions,
-  getSteCategoriesOptions,
   getContractsSupplierRegionsOptions,
   getContractsProcurementMethodsOptions,
+  getSteCategoriesOptions,
   postApplicationsByAppIdQueriesByQueryIdContractsMutation,
 } from "@/shared/api/autogen/@tanstack/react-query.gen";
 import {
@@ -50,12 +50,16 @@ export function QueryPage() {
     getApplicationsByIdOptions({ path: { id: numAppId } })
   );
 
-  const { data: categories = [] } = useQuery(getSteCategoriesOptions());
   const { data: supplierRegions = [] } = useQuery(getContractsSupplierRegionsOptions());
   const { data: procurementMethods = [] } = useQuery(getContractsProcurementMethodsOptions());
 
   const currentQuery = app?.queries?.find((q) => q.id === numQueryId);
   const queryText = currentQuery?.queryText ?? "";
+
+  const { data: categories = [] } = useQuery({
+    ...getSteCategoriesOptions({ query: { query: queryText } }),
+    enabled: !!queryText,
+  });
   const linkedContracts = currentQuery?.contracts ?? [];
 
   const activeQuery = {
@@ -149,7 +153,7 @@ export function QueryPage() {
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Категория</p>
             <MultiSelectCombobox
-              items={categories as string[]}
+              items={categories}
               value={categoryFilter}
               onValueChange={setCategoryFilter}
               placeholder="Все категории"
