@@ -66,11 +66,7 @@ export function SteResultsList({
         <SteCard
           key={item.ste_id}
           item={item}
-          isLinked={
-            item.ste_id !== undefined &&
-            // @ts-expect-error тут косяк на бэке, костылим пока
-            linkedSteIds.has(Number.parseInt(item.ste_id as string))
-          }
+          isLinked={item.ste_id !== undefined && linkedSteIds.has(item.ste_id)}
           isPending={linkingId === item.ste_id}
           onLink={onLink}
         />

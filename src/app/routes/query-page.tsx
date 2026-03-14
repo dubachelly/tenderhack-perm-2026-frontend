@@ -1,7 +1,9 @@
 import { useRef, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ShoppingBasket, X } from "lucide-react";
+import { ShoppingBasket, FileDown, X } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
 
 import {
   getApplicationsByIdOptions,
@@ -75,6 +77,55 @@ export function QueryPage() {
       path: { appId: numAppId, queryId: numQueryId },
       body: { steId, nameMatchPercent: rank },
     });
+  };
+
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
+
+  const handleGenerateReport = async () => {
+    if (linkedStes.length === 0) return;
+    setIsGeneratingReport(true);
+    try {
+      const firstSte = linkedStes[0];
+      const payload = {
+        items: linkedStes.map((ste) => ({
+          contractId: "",
+          procurementMethod: "",
+          initialContractValue: "",
+          contractValueAfterSigning: "",
+          reductionPercent: "",
+          contractSigningDate: "",
+          buyerInn: "",
+          supplierInn: "",
+          steId: ste.steId ?? 0,
+          steItemName: ste.steName ?? "",
+          unitPrice: ste.medianPrice != null ? String(ste.medianPrice) : "",
+        })),
+        currency: "RUB",
+        reportTitle: "Обоснование начальной цены СТЕ",
+        steId: firstSte.steId ?? 0,
+        steItemName: firstSte.steName ?? "",
+        signerName: "",
+        signerTitle: "",
+      };
+      const response = await fetch(
+        "http://localhost:8000/api/v1/ste-price-justification/doc",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        }
+      );
+      if (!response.ok) throw new Error(`Ошибка: ${response.status}`);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "report.doc";
+      a.click();
+      URL.revokeObjectURL(url);
+    } finally {
+      setIsGeneratingReport(false);
+    }
   };
 
   return (
@@ -153,6 +204,15 @@ export function QueryPage() {
               )}
             </div>
           </div>
+          <Button
+            className="w-full mt-2"
+            size="sm"
+            disabled={linkedStes.length === 0 || isGeneratingReport}
+            onClick={handleGenerateReport}
+          >
+            <FileDown className="size-4" />
+            {isGeneratingReport ? "Генерация..." : "Сгенерировать отчёт"}
+          </Button>
         </div>
       </div>
 

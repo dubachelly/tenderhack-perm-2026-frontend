@@ -51,6 +51,10 @@ export type ContractItemWithSte = {
     steCategory?: string | null;
     steManufacturer?: string | null;
     steCharacteristics?: string | null;
+    /**
+     * Median unit price for the STE, excluding outliers
+     */
+    medianPrice?: number | null;
 };
 
 export type Application = {
@@ -84,6 +88,10 @@ export type ApplicationQuerySteWithSte = {
     steCategory?: string | null;
     steManufacturer?: string | null;
     steCharacteristics?: string | null;
+    /**
+     * Median unit price for the STE, excluding outliers
+     */
+    medianPrice?: number | null;
 };
 
 export type ApplicationQueryFull = {
@@ -119,6 +127,10 @@ export type SearchSteGroup = {
      * Релевантность полнотекстового поиска
      */
     rank?: number;
+    /**
+     * Median unit price for the STE, excluding outliers
+     */
+    median_price?: number | null;
     contracts?: Array<SearchContractItem>;
 };
 
