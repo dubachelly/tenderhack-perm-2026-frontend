@@ -38,7 +38,7 @@ export function SteCard({ item, linkedContractIds, onLink, onUnlink, linkingId }
               <Badge variant="secondary">{item.ste_category}</Badge>
             )}
             {item.ste_manufacturer && (
-              <Badge variant="outline">{item.ste_manufacturer}</Badge>
+              <Badge variant="outline">{item.ste_manufacturer.replace(/общество с ограниченной ответственностью/gi, "ООО")}</Badge>
             )}
             <span
               className={cn(

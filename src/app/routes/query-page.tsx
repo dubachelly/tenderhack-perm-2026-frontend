@@ -6,7 +6,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query"
-import { SlidersHorizontal, Plus } from "lucide-react"
+import { SlidersHorizontal, Plus, Search } from "lucide-react"
 
 import {
   getApplicationsByIdOptions,
@@ -17,6 +17,7 @@ import {
   getSteCategoriesOptions,
   postApplicationsByAppIdQueriesByQueryIdContractsMutation,
   deleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdMutation,
+  patchApplicationsByAppIdQueriesByQueryIdMutation,
 } from "@/shared/api/autogen/@tanstack/react-query.gen"
 import {
   Breadcrumb,
@@ -27,6 +28,11 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb"
 import { Button } from "@/components/ui/button"
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/components/ui/input-group"
 import { SteResultsList } from "@/components/ste-results-list"
 import { ScrollToTopButton } from "@/components/scroll-to-top-button"
 import { MultiSelectCombobox } from "@/components/multiselect-combobox"
@@ -41,6 +47,8 @@ export function QueryPage() {
   const qc = useQueryClient()
   const [linkingId, setLinkingId] = useState<number | null>(null)
 
+  const [searchInput, setSearchInput] = useState("")
+  const [debouncedSearch, setDebouncedSearch] = useState("")
   const [categoryFilter, setCategoryFilter] = useState<string[]>([])
   const [supplierRegionFilter, setSupplierRegionFilter] = useState<string[]>([])
   const [procurementMethodFilter, setProcurementMethodFilter] = useState<
@@ -69,14 +77,28 @@ export function QueryPage() {
   const currentQuery = app?.queries?.find((q) => q.id === numQueryId)
   const queryText = currentQuery?.queryText ?? ""
 
+  useEffect(() => {
+    if (queryText) {
+      setSearchInput(queryText)
+      setDebouncedSearch(queryText)
+    }
+  }, [queryText])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput.trim())
+    }, 400)
+    return () => clearTimeout(timer)
+  }, [searchInput])
+
   const { data: categories = [] } = useQuery({
-    ...getSteCategoriesOptions({ query: { query: queryText } }),
-    enabled: !!queryText,
+    ...getSteCategoriesOptions({ query: { query: debouncedSearch } }),
+    enabled: !!debouncedSearch,
   })
   const linkedContracts = currentQuery?.contracts ?? []
 
   const activeQuery = {
-    q: queryText,
+    q: debouncedSearch,
     limit: 20,
     ...(categoryFilter.length > 0 ? { category: categoryFilter } : {}),
     ...(supplierRegionFilter.length > 0
@@ -99,8 +121,26 @@ export function QueryPage() {
           return undefined
         return (lastPageParam as number) + 1
       },
-      enabled: !!queryText,
+      enabled: !!debouncedSearch,
     })
+
+  const patchQueryMutation = useMutation({
+    ...patchApplicationsByAppIdQueriesByQueryIdMutation(),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: getApplicationsByIdQueryKey({ path: { id: numAppId } }),
+      })
+    },
+  })
+
+  useEffect(() => {
+    if (debouncedSearch && debouncedSearch !== queryText) {
+      patchQueryMutation.mutate({
+        path: { appId: numAppId, queryId: numQueryId },
+        body: { queryText: debouncedSearch },
+      })
+    }
+  }, [debouncedSearch])
 
   const linkMutation = useMutation({
     ...postApplicationsByAppIdQueriesByQueryIdContractsMutation(),
@@ -170,6 +210,17 @@ export function QueryPage() {
         </Breadcrumb>
       </div>
 
+      <InputGroup className="mb-4 rounded-md h-9">
+        <InputGroupAddon>
+          <Search />
+        </InputGroupAddon>
+        <InputGroupInput
+          placeholder="Название запроса..."
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+        />
+      </InputGroup>
+
       <div className="mb-4 rounded-lg border bg-card p-4">
         <div className="mb-3 flex items-center gap-2">
           <SlidersHorizontal className="size-4 text-muted-foreground" />
@@ -227,7 +278,7 @@ export function QueryPage() {
       </div>
 
       <div className="pb-14">
-        {queryText ? (
+        {debouncedSearch ? (
           <SteResultsList
             data={data}
             isLoading={isLoading}

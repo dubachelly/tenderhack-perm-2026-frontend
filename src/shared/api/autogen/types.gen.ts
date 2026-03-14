@@ -679,6 +679,44 @@ export type DeleteApplicationsByAppIdQueriesByQueryIdResponses = {
 
 export type DeleteApplicationsByAppIdQueriesByQueryIdResponse = DeleteApplicationsByAppIdQueriesByQueryIdResponses[keyof DeleteApplicationsByAppIdQueriesByQueryIdResponses];
 
+export type PatchApplicationsByAppIdQueriesByQueryIdData = {
+    body: {
+        queryText: string;
+    };
+    path: {
+        appId: number;
+        queryId: number;
+    };
+    query?: never;
+    url: '/applications/{appId}/queries/{queryId}';
+};
+
+export type PatchApplicationsByAppIdQueriesByQueryIdErrors = {
+    /**
+     * Error
+     */
+    400: Error;
+    /**
+     * Error
+     */
+    404: Error;
+    /**
+     * Error
+     */
+    500: Error;
+};
+
+export type PatchApplicationsByAppIdQueriesByQueryIdError = PatchApplicationsByAppIdQueriesByQueryIdErrors[keyof PatchApplicationsByAppIdQueriesByQueryIdErrors];
+
+export type PatchApplicationsByAppIdQueriesByQueryIdResponses = {
+    /**
+     * Обновлённый запрос
+     */
+    200: ApplicationQuery;
+};
+
+export type PatchApplicationsByAppIdQueriesByQueryIdResponse = PatchApplicationsByAppIdQueriesByQueryIdResponses[keyof PatchApplicationsByAppIdQueriesByQueryIdResponses];
+
 export type PostApplicationsByAppIdQueriesByQueryIdContractsData = {
     body: {
         contractItemId: number;
