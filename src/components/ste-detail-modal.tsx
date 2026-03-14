@@ -87,15 +87,6 @@ function ContractTable({
           <TableHead className="min-w-48 font-normal">
             Наименование закупки
           </TableHead>
-          <TableHead className="text-right font-normal">
-            Начальная стоимость
-          </TableHead>
-          <TableHead className="text-right font-normal">
-            Конечная стоимость
-          </TableHead>
-          <TableHead className="text-right font-normal">
-            Снижение стоимости
-          </TableHead>
           <TableHead className="text-right font-normal">НДС</TableHead>
           <TableHead className="text-right font-normal">
             Дата заключения
@@ -138,15 +129,6 @@ function ContractTable({
               </TableCell>
               <TableCell className="py-1.5">
                 {c.procurement_name ?? "—"}
-              </TableCell>
-              <TableCell className="py-1.5 text-right">
-                {formatCurrency(c.initial_contract_value)}
-              </TableCell>
-              <TableCell className="py-1.5 text-right">
-                {formatCurrency(c.contract_value_after_signing)}
-              </TableCell>
-              <TableCell className="py-1.5 text-right">
-                {formatPercent(c.reduction_percent)}
               </TableCell>
               <TableCell className="py-1.5 text-right">
                 {formatPercent(c.vat_rate)}
