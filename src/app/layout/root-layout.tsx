@@ -1,16 +1,35 @@
-import { Outlet } from "react-router";
-import { Sidebar } from "./sidebar";
-import { SidebarProvider } from "./sidebar-context";
+import { Outlet, useNavigate } from "react-router";
+import { Plus, History } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export function RootLayout() {
+  const navigate = useNavigate();
+
   return (
-    <SidebarProvider>
-      <div className="flex h-svh overflow-hidden">
-        <Sidebar />
-        <main className="flex-1 overflow-y-auto">
-          <Outlet />
-        </main>
+    <div className="h-svh overflow-hidden">
+      <main className="h-full overflow-y-auto">
+        <Outlet />
+      </main>
+
+      <div className="fixed bottom-6 right-6 flex flex-col items-center gap-3 z-50">
+        <Button
+          size="icon"
+          variant="outline"
+          onClick={() => navigate("/history")}
+          className="size-10 rounded-full shadow-md"
+          title="История заявок"
+        >
+          <History className="size-4" />
+        </Button>
+        <Button
+          size="icon"
+          onClick={() => navigate("/")}
+          className="size-14 rounded-full shadow-lg"
+          title="Новая заявка"
+        >
+          <Plus className="size-7" />
+        </Button>
       </div>
-    </SidebarProvider>
+    </div>
   );
 }
