@@ -1,15 +1,13 @@
 import { useRef, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ShoppingBasket, FileDown, X } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
+import { ShoppingBasket } from "lucide-react";
 
 import {
   getApplicationsByIdOptions,
   getApplicationsByIdQueryKey,
   getSearchItemsInfiniteOptions,
-  postApplicationsByAppIdQueriesByQueryIdStesMutation,
+  postApplicationsByAppIdQueriesByQueryIdContractsMutation,
 } from "@/shared/api/autogen/@tanstack/react-query.gen";
 import { SearchBar } from "@/components/search-bar";
 import { SteResultsList } from "@/components/ste-results-list";
@@ -35,7 +33,7 @@ export function QueryPage() {
 
   const currentQuery = app?.queries?.find((q) => q.id === numQueryId);
   const queryText = currentQuery?.queryText ?? "";
-  const linkedStes = currentQuery?.stes ?? [];
+  const linkedContracts = currentQuery?.contracts ?? [];
 
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
     useInfiniteQuery({
@@ -53,8 +51,8 @@ export function QueryPage() {
     });
 
   const linkMutation = useMutation({
-    ...postApplicationsByAppIdQueriesByQueryIdStesMutation(),
-    onMutate: (vars) => setLinkingId(vars.body.steId),
+    ...postApplicationsByAppIdQueriesByQueryIdContractsMutation(),
+    onMutate: (vars) => setLinkingId(vars.body.contractId),
     onSettled: () => setLinkingId(null),
     onSuccess: () => {
       qc.invalidateQueries({
@@ -72,60 +70,11 @@ export function QueryPage() {
     });
   };
 
-  const handleLink = (steId: number, rank: number) => {
+  const handleLink = (contractId: number) => {
     linkMutation.mutate({
       path: { appId: numAppId, queryId: numQueryId },
-      body: { steId, nameMatchPercent: rank },
+      body: { contractId },
     });
-  };
-
-  const [isGeneratingReport, setIsGeneratingReport] = useState(false);
-
-  const handleGenerateReport = async () => {
-    if (linkedStes.length === 0) return;
-    setIsGeneratingReport(true);
-    try {
-      const firstSte = linkedStes[0];
-      const payload = {
-        items: linkedStes.map((ste) => ({
-          contractId: "",
-          procurementMethod: "",
-          initialContractValue: "",
-          contractValueAfterSigning: "",
-          reductionPercent: "",
-          contractSigningDate: "",
-          buyerInn: "",
-          supplierInn: "",
-          steId: ste.steId ?? 0,
-          steItemName: ste.steName ?? "",
-          unitPrice: ste.medianPrice != null ? String(ste.medianPrice) : "",
-        })),
-        currency: "RUB",
-        reportTitle: "Обоснование начальной цены СТЕ",
-        steId: firstSte.steId ?? 0,
-        steItemName: firstSte.steName ?? "",
-        signerName: "",
-        signerTitle: "",
-      };
-      const response = await fetch(
-        "http://localhost:8000/api/v1/ste-price-justification/doc",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
-      if (!response.ok) throw new Error(`Ошибка: ${response.status}`);
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "report.doc";
-      a.click();
-      URL.revokeObjectURL(url);
-    } finally {
-      setIsGeneratingReport(false);
-    }
   };
 
   return (
@@ -171,31 +120,31 @@ export function QueryPage() {
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
             <div className="flex items-center gap-2 px-4 py-3 border-b">
               <ShoppingBasket className="size-4 text-muted-foreground" />
-              <span className="text-sm font-medium">Привязанные СТЕ</span>
-              {linkedStes.length > 0 && (
+              <span className="text-sm font-medium">Привязанные контракты</span>
+              {linkedContracts.length > 0 && (
                 <span className="ml-auto text-xs text-muted-foreground">
-                  {linkedStes.length}
+                  {linkedContracts.length}
                 </span>
               )}
             </div>
             <div className="p-2">
-              {linkedStes.length === 0 ? (
+              {linkedContracts.length === 0 ? (
                 <p className="text-xs text-muted-foreground text-center py-6 px-2">
-                  Нет привязанных СТЕ
+                  Нет привязанных контрактов
                 </p>
               ) : (
                 <ul className="space-y-1">
-                  {linkedStes.map((ste) => (
+                  {linkedContracts.map((c) => (
                     <li
-                      key={ste.id}
+                      key={c.contractId}
                       className="flex items-start gap-2 rounded-md px-2 py-2 text-xs hover:bg-muted/50"
                     >
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium truncate" title={ste.steName ?? undefined}>
-                          {ste.steName ?? "—"}
+                        <p className="font-medium truncate" title={c.procurementName ?? undefined}>
+                          {c.procurementName ?? "—"}
                         </p>
-                        {ste.steCategory && (
-                          <p className="text-muted-foreground truncate">{ste.steCategory}</p>
+                        {c.procurementMethod && (
+                          <p className="text-muted-foreground truncate">{c.procurementMethod}</p>
                         )}
                       </div>
                     </li>
@@ -204,15 +153,6 @@ export function QueryPage() {
               )}
             </div>
           </div>
-          <Button
-            className="w-full mt-2"
-            size="sm"
-            disabled={linkedStes.length === 0 || isGeneratingReport}
-            onClick={handleGenerateReport}
-          >
-            <FileDown className="size-4" />
-            {isGeneratingReport ? "Генерация..." : "Сгенерировать отчёт"}
-          </Button>
         </div>
       </div>
 

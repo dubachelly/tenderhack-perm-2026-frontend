@@ -51,10 +51,6 @@ export type ContractItemWithSte = {
     steCategory?: string | null;
     steManufacturer?: string | null;
     steCharacteristics?: string | null;
-    /**
-     * Median unit price for the STE, excluding outliers
-     */
-    medianPrice?: number | null;
 };
 
 export type Application = {
@@ -69,36 +65,32 @@ export type ApplicationQuery = {
     queryText?: string;
 };
 
-export type ApplicationQuerySte = {
-    id?: number;
+export type ApplicationQueryContract = {
     queryId?: number;
-    steId?: number;
-    /**
-     * numeric(5,2)
-     */
-    nameMatchPercent?: string;
+    contractId?: number;
 };
 
-export type ApplicationQuerySteWithSte = {
-    id?: number;
+export type ApplicationQueryContractWithContract = {
     queryId?: number;
-    steId?: number;
-    nameMatchPercent?: string;
-    steName?: string | null;
-    steCategory?: string | null;
-    steManufacturer?: string | null;
-    steCharacteristics?: string | null;
-    /**
-     * Median unit price for the STE, excluding outliers
-     */
-    medianPrice?: number | null;
+    contractId?: number;
+    procurementName?: string | null;
+    procurementMethod?: string | null;
+    initialContractValue?: string | null;
+    contractValueAfterSigning?: string | null;
+    reductionPercent?: string | null;
+    vatRate?: string | null;
+    contractSigningDate?: string | null;
+    buyerInn?: string | null;
+    buyerRegion?: string | null;
+    supplierInn?: string | null;
+    supplierRegion?: string | null;
 };
 
 export type ApplicationQueryFull = {
     id?: number;
     applicationId?: number;
     queryText?: string;
-    stes?: Array<ApplicationQuerySteWithSte>;
+    contracts?: Array<ApplicationQueryContractWithContract>;
 };
 
 export type ApplicationFull = Application & {
@@ -127,10 +119,6 @@ export type SearchSteGroup = {
      * Релевантность полнотекстового поиска
      */
     rank?: number;
-    /**
-     * Median unit price for the STE, excluding outliers
-     */
-    median_price?: number | null;
     contracts?: Array<SearchContractItem>;
 };
 
@@ -644,20 +632,19 @@ export type DeleteApplicationsByAppIdQueriesByQueryIdResponses = {
 
 export type DeleteApplicationsByAppIdQueriesByQueryIdResponse = DeleteApplicationsByAppIdQueriesByQueryIdResponses[keyof DeleteApplicationsByAppIdQueriesByQueryIdResponses];
 
-export type PostApplicationsByAppIdQueriesByQueryIdStesData = {
+export type PostApplicationsByAppIdQueriesByQueryIdContractsData = {
     body: {
-        steId: number;
-        nameMatchPercent: number;
+        contractId: number;
     };
     path: {
         appId: number;
         queryId: number;
     };
     query?: never;
-    url: '/applications/{appId}/queries/{queryId}/stes';
+    url: '/applications/{appId}/queries/{queryId}/contracts';
 };
 
-export type PostApplicationsByAppIdQueriesByQueryIdStesErrors = {
+export type PostApplicationsByAppIdQueriesByQueryIdContractsErrors = {
     /**
      * Error
      */
@@ -672,29 +659,29 @@ export type PostApplicationsByAppIdQueriesByQueryIdStesErrors = {
     500: Error;
 };
 
-export type PostApplicationsByAppIdQueriesByQueryIdStesError = PostApplicationsByAppIdQueriesByQueryIdStesErrors[keyof PostApplicationsByAppIdQueriesByQueryIdStesErrors];
+export type PostApplicationsByAppIdQueriesByQueryIdContractsError = PostApplicationsByAppIdQueriesByQueryIdContractsErrors[keyof PostApplicationsByAppIdQueriesByQueryIdContractsErrors];
 
-export type PostApplicationsByAppIdQueriesByQueryIdStesResponses = {
+export type PostApplicationsByAppIdQueriesByQueryIdContractsResponses = {
     /**
      * Created
      */
-    201: ApplicationQuerySte;
+    201: ApplicationQueryContract;
 };
 
-export type PostApplicationsByAppIdQueriesByQueryIdStesResponse = PostApplicationsByAppIdQueriesByQueryIdStesResponses[keyof PostApplicationsByAppIdQueriesByQueryIdStesResponses];
+export type PostApplicationsByAppIdQueriesByQueryIdContractsResponse = PostApplicationsByAppIdQueriesByQueryIdContractsResponses[keyof PostApplicationsByAppIdQueriesByQueryIdContractsResponses];
 
-export type DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdData = {
+export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdData = {
     body?: never;
     path: {
         appId: number;
         queryId: number;
-        steId: number;
+        contractId: number;
     };
     query?: never;
-    url: '/applications/{appId}/queries/{queryId}/stes/{steId}';
+    url: '/applications/{appId}/queries/{queryId}/contracts/{contractId}';
 };
 
-export type DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdErrors = {
+export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdErrors = {
     /**
      * Error
      */
@@ -709,9 +696,9 @@ export type DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdErrors = {
     500: Error;
 };
 
-export type DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdError = DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdErrors[keyof DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdErrors];
+export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdError = DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdErrors[keyof DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdErrors];
 
-export type DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdResponses = {
+export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdResponses = {
     /**
      * OK
      */
@@ -720,7 +707,7 @@ export type DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdResponses = {
     };
 };
 
-export type DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdResponse = DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdResponses[keyof DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdResponses];
+export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdResponse = DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdResponses[keyof DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdResponses];
 
 export type GetSearchItemsData = {
     body?: never;

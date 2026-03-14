@@ -6,7 +6,6 @@ import {
   CardHeader,
   CardTitle,
   CardContent,
-  CardAction,
 } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -14,21 +13,15 @@ import { parseCharacteristics } from "@/lib/utils"
 
 interface SteCardProps {
   item: SearchSteGroup
-  isLinked: boolean
-  onLink: (steId: number, rank: number) => void
-  isPending: boolean
+  linkedContractIds: Set<number>
+  onLink: (contractId: number) => void
+  linkingId: number | null
 }
 
-export function SteCard({ item, isLinked, onLink, isPending }: SteCardProps) {
+export function SteCard({ item, linkedContractIds, onLink, linkingId }: SteCardProps) {
   const [expanded, setExpanded] = useState(false)
   const characteristics = parseCharacteristics(item.ste_characteristics)
   const contracts = item.contracts ?? []
-
-  const handleLink = () => {
-    if (!item.ste_id) return
-    const matchPercent = Math.round((item.rank ?? 0) * 100)
-    onLink(item.ste_id, matchPercent)
-  }
 
   return (
     <Card size="sm">
@@ -42,23 +35,6 @@ export function SteCard({ item, isLinked, onLink, isPending }: SteCardProps) {
             <Badge variant="outline">{item.ste_manufacturer}</Badge>
           )}
         </div>
-        <CardAction>
-          <Button
-            size="sm"
-            variant={isLinked ? "outline" : "default"}
-            disabled={isLinked || isPending || !item.ste_id}
-            onClick={handleLink}
-          >
-            {isLinked ? (
-              <>
-                <Check className="size-3.5" />
-                Привязана
-              </>
-            ) : (
-              "Привязать"
-            )}
-          </Button>
-        </CardAction>
       </CardHeader>
 
       <CardContent className="space-y-0">
@@ -124,30 +100,56 @@ export function SteCard({ item, isLinked, onLink, isPending }: SteCardProps) {
                         <th className="pr-3 pb-1 text-right font-normal">
                           Количество
                         </th>
-                        <th className="pb-1 text-right font-normal">
+                        <th className="pr-3 pb-1 text-right font-normal">
                           Цена за ед., ₽
                         </th>
+                        <th className="pb-1" />
                       </tr>
                     </thead>
                     <tbody>
-                      {contracts.map((c) => (
-                        <tr
-                          key={c.id}
-                          className="border-b border-border/50 last:border-0"
-                        >
-                          <td className="py-1 pr-3">
-                            {c.ste_item_name ?? "—"}
-                          </td>
-                          <td className="py-1 pr-3 text-right whitespace-nowrap">
-                            {c.quantity
-                              ? `${c.quantity} ${c.unit ?? ""}`.trim()
-                              : "—"}
-                          </td>
-                          <td className="py-1 text-right whitespace-nowrap">
-                            {c.unit_price ?? "—"}
-                          </td>
-                        </tr>
-                      ))}
+                      {contracts.map((c) => {
+                        const contractId = c.contract_id
+                        const linked = contractId !== undefined && linkedContractIds.has(contractId)
+                        const pending = contractId !== undefined && linkingId === contractId
+                        return (
+                          <tr
+                            key={c.id}
+                            className="border-b border-border/50 last:border-0"
+                          >
+                            <td className="py-1 pr-3">
+                              {c.ste_item_name ?? "—"}
+                            </td>
+                            <td className="py-1 pr-3 text-right whitespace-nowrap">
+                              {c.quantity
+                                ? `${c.quantity} ${c.unit ?? ""}`.trim()
+                                : "—"}
+                            </td>
+                            <td className="py-1 pr-3 text-right whitespace-nowrap">
+                              {c.unit_price ?? "—"}
+                            </td>
+                            <td className="py-1">
+                              <Button
+                                size="sm"
+                                variant={linked ? "outline" : "default"}
+                                className="h-6 px-2 text-xs"
+                                disabled={linked || pending || !contractId}
+                                onClick={() => contractId && onLink(contractId)}
+                              >
+                                {linked ? (
+                                  <>
+                                    <Check className="size-3" />
+                                    Привязан
+                                  </>
+                                ) : pending ? (
+                                  "..."
+                                ) : (
+                                  "Привязать"
+                                )}
+                              </Button>
+                            </td>
+                          </tr>
+                        )
+                      })}
                     </tbody>
                   </table>
                 </div>

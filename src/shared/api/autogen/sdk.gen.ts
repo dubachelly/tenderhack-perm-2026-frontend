@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteApplicationsByAppIdQueriesByQueryIdData, DeleteApplicationsByAppIdQueriesByQueryIdErrors, DeleteApplicationsByAppIdQueriesByQueryIdResponses, DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdData, DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdErrors, DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdResponses, DeleteApplicationsByIdData, DeleteApplicationsByIdErrors, DeleteApplicationsByIdResponses, GetApplicationsByIdData, GetApplicationsByIdErrors, GetApplicationsByIdResponses, GetApplicationsData, GetApplicationsErrors, GetApplicationsResponses, GetContractsBuyerRegionsData, GetContractsBuyerRegionsErrors, GetContractsBuyerRegionsResponses, GetContractsByIdData, GetContractsByIdErrors, GetContractsByIdItemsData, GetContractsByIdItemsErrors, GetContractsByIdItemsResponses, GetContractsByIdResponses, GetContractsData, GetContractsErrors, GetContractsResponses, GetContractsSupplierRegionsData, GetContractsSupplierRegionsErrors, GetContractsSupplierRegionsResponses, GetHealthData, GetHealthResponses, GetSearchItemsData, GetSearchItemsErrors, GetSearchItemsResponses, GetSteByIdData, GetSteByIdErrors, GetSteByIdResponses, GetSteCategoriesData, GetSteCategoriesErrors, GetSteCategoriesResponses, GetSteData, GetSteErrors, GetSteResponses, PostApplicationsByAppIdQueriesByQueryIdStesData, PostApplicationsByAppIdQueriesByQueryIdStesErrors, PostApplicationsByAppIdQueriesByQueryIdStesResponses, PostApplicationsByIdQueriesData, PostApplicationsByIdQueriesErrors, PostApplicationsByIdQueriesResponses, PostApplicationsData, PostApplicationsErrors, PostApplicationsResponses } from './types.gen';
+import type { DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdData, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdErrors, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdResponses, DeleteApplicationsByAppIdQueriesByQueryIdData, DeleteApplicationsByAppIdQueriesByQueryIdErrors, DeleteApplicationsByAppIdQueriesByQueryIdResponses, DeleteApplicationsByIdData, DeleteApplicationsByIdErrors, DeleteApplicationsByIdResponses, GetApplicationsByIdData, GetApplicationsByIdErrors, GetApplicationsByIdResponses, GetApplicationsData, GetApplicationsErrors, GetApplicationsResponses, GetContractsBuyerRegionsData, GetContractsBuyerRegionsErrors, GetContractsBuyerRegionsResponses, GetContractsByIdData, GetContractsByIdErrors, GetContractsByIdItemsData, GetContractsByIdItemsErrors, GetContractsByIdItemsResponses, GetContractsByIdResponses, GetContractsData, GetContractsErrors, GetContractsResponses, GetContractsSupplierRegionsData, GetContractsSupplierRegionsErrors, GetContractsSupplierRegionsResponses, GetHealthData, GetHealthResponses, GetSearchItemsData, GetSearchItemsErrors, GetSearchItemsResponses, GetSteByIdData, GetSteByIdErrors, GetSteByIdResponses, GetSteCategoriesData, GetSteCategoriesErrors, GetSteCategoriesResponses, GetSteData, GetSteErrors, GetSteResponses, PostApplicationsByAppIdQueriesByQueryIdContractsData, PostApplicationsByAppIdQueriesByQueryIdContractsErrors, PostApplicationsByAppIdQueriesByQueryIdContractsResponses, PostApplicationsByIdQueriesData, PostApplicationsByIdQueriesErrors, PostApplicationsByIdQueriesResponses, PostApplicationsData, PostApplicationsErrors, PostApplicationsResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -86,7 +86,7 @@ export const postApplications = <ThrowOnError extends boolean = false>(options: 
 export const deleteApplicationsById = <ThrowOnError extends boolean = false>(options: Options<DeleteApplicationsByIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteApplicationsByIdResponses, DeleteApplicationsByIdErrors, ThrowOnError>({ url: '/applications/{id}', ...options });
 
 /**
- * Заявка со всеми запросами и привязанными СТЕ
+ * Заявка со всеми запросами и привязанными контрактами
  */
 export const getApplicationsById = <ThrowOnError extends boolean = false>(options: Options<GetApplicationsByIdData, ThrowOnError>) => (options.client ?? client).get<GetApplicationsByIdResponses, GetApplicationsByIdErrors, ThrowOnError>({ url: '/applications/{id}', ...options });
 
@@ -108,10 +108,10 @@ export const postApplicationsByIdQueries = <ThrowOnError extends boolean = false
 export const deleteApplicationsByAppIdQueriesByQueryId = <ThrowOnError extends boolean = false>(options: Options<DeleteApplicationsByAppIdQueriesByQueryIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteApplicationsByAppIdQueriesByQueryIdResponses, DeleteApplicationsByAppIdQueriesByQueryIdErrors, ThrowOnError>({ url: '/applications/{appId}/queries/{queryId}', ...options });
 
 /**
- * Привязать СТЕ к запросу
+ * Привязать контракт к запросу
  */
-export const postApplicationsByAppIdQueriesByQueryIdStes = <ThrowOnError extends boolean = false>(options: Options<PostApplicationsByAppIdQueriesByQueryIdStesData, ThrowOnError>) => (options.client ?? client).post<PostApplicationsByAppIdQueriesByQueryIdStesResponses, PostApplicationsByAppIdQueriesByQueryIdStesErrors, ThrowOnError>({
-    url: '/applications/{appId}/queries/{queryId}/stes',
+export const postApplicationsByAppIdQueriesByQueryIdContracts = <ThrowOnError extends boolean = false>(options: Options<PostApplicationsByAppIdQueriesByQueryIdContractsData, ThrowOnError>) => (options.client ?? client).post<PostApplicationsByAppIdQueriesByQueryIdContractsResponses, PostApplicationsByAppIdQueriesByQueryIdContractsErrors, ThrowOnError>({
+    url: '/applications/{appId}/queries/{queryId}/contracts',
     ...options,
     headers: {
         'Content-Type': 'application/json',
@@ -120,9 +120,9 @@ export const postApplicationsByAppIdQueriesByQueryIdStes = <ThrowOnError extends
 });
 
 /**
- * Отвязать СТЕ от запроса
+ * Отвязать контракт от запроса
  */
-export const deleteApplicationsByAppIdQueriesByQueryIdStesBySteId = <ThrowOnError extends boolean = false>(options: Options<DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdResponses, DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdErrors, ThrowOnError>({ url: '/applications/{appId}/queries/{queryId}/stes/{steId}', ...options });
+export const deleteApplicationsByAppIdQueriesByQueryIdContractsByContractId = <ThrowOnError extends boolean = false>(options: Options<DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdResponses, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdErrors, ThrowOnError>({ url: '/applications/{appId}/queries/{queryId}/contracts/{contractId}', ...options });
 
 /**
  * Полнотекстовый поиск позиций контрактов по СТЕ

@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { deleteApplicationsByAppIdQueriesByQueryId, deleteApplicationsByAppIdQueriesByQueryIdStesBySteId, deleteApplicationsById, getApplications, getApplicationsById, getContracts, getContractsBuyerRegions, getContractsById, getContractsByIdItems, getContractsSupplierRegions, getHealth, getSearchItems, getSte, getSteById, getSteCategories, type Options, postApplications, postApplicationsByAppIdQueriesByQueryIdStes, postApplicationsByIdQueries } from '../sdk.gen';
-import type { DeleteApplicationsByAppIdQueriesByQueryIdData, DeleteApplicationsByAppIdQueriesByQueryIdError, DeleteApplicationsByAppIdQueriesByQueryIdResponse, DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdData, DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdError, DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdResponse, DeleteApplicationsByIdData, DeleteApplicationsByIdError, DeleteApplicationsByIdResponse, GetApplicationsByIdData, GetApplicationsByIdError, GetApplicationsByIdResponse, GetApplicationsData, GetApplicationsError, GetApplicationsResponse, GetContractsBuyerRegionsData, GetContractsBuyerRegionsError, GetContractsBuyerRegionsResponse, GetContractsByIdData, GetContractsByIdError, GetContractsByIdItemsData, GetContractsByIdItemsError, GetContractsByIdItemsResponse, GetContractsByIdResponse, GetContractsData, GetContractsError, GetContractsResponse, GetContractsSupplierRegionsData, GetContractsSupplierRegionsError, GetContractsSupplierRegionsResponse, GetHealthData, GetHealthResponse, GetSearchItemsData, GetSearchItemsError, GetSearchItemsResponse, GetSteByIdData, GetSteByIdError, GetSteByIdResponse, GetSteCategoriesData, GetSteCategoriesError, GetSteCategoriesResponse, GetSteData, GetSteError, GetSteResponse, PostApplicationsByAppIdQueriesByQueryIdStesData, PostApplicationsByAppIdQueriesByQueryIdStesError, PostApplicationsByAppIdQueriesByQueryIdStesResponse, PostApplicationsByIdQueriesData, PostApplicationsByIdQueriesError, PostApplicationsByIdQueriesResponse, PostApplicationsData, PostApplicationsError, PostApplicationsResponse } from '../types.gen';
+import { deleteApplicationsByAppIdQueriesByQueryId, deleteApplicationsByAppIdQueriesByQueryIdContractsByContractId, deleteApplicationsById, getApplications, getApplicationsById, getContracts, getContractsBuyerRegions, getContractsById, getContractsByIdItems, getContractsSupplierRegions, getHealth, getSearchItems, getSte, getSteById, getSteCategories, type Options, postApplications, postApplicationsByAppIdQueriesByQueryIdContracts, postApplicationsByIdQueries } from '../sdk.gen';
+import type { DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdData, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdError, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdResponse, DeleteApplicationsByAppIdQueriesByQueryIdData, DeleteApplicationsByAppIdQueriesByQueryIdError, DeleteApplicationsByAppIdQueriesByQueryIdResponse, DeleteApplicationsByIdData, DeleteApplicationsByIdError, DeleteApplicationsByIdResponse, GetApplicationsByIdData, GetApplicationsByIdError, GetApplicationsByIdResponse, GetApplicationsData, GetApplicationsError, GetApplicationsResponse, GetContractsBuyerRegionsData, GetContractsBuyerRegionsError, GetContractsBuyerRegionsResponse, GetContractsByIdData, GetContractsByIdError, GetContractsByIdItemsData, GetContractsByIdItemsError, GetContractsByIdItemsResponse, GetContractsByIdResponse, GetContractsData, GetContractsError, GetContractsResponse, GetContractsSupplierRegionsData, GetContractsSupplierRegionsError, GetContractsSupplierRegionsResponse, GetHealthData, GetHealthResponse, GetSearchItemsData, GetSearchItemsError, GetSearchItemsResponse, GetSteByIdData, GetSteByIdError, GetSteByIdResponse, GetSteCategoriesData, GetSteCategoriesError, GetSteCategoriesResponse, GetSteData, GetSteError, GetSteResponse, PostApplicationsByAppIdQueriesByQueryIdContractsData, PostApplicationsByAppIdQueriesByQueryIdContractsError, PostApplicationsByAppIdQueriesByQueryIdContractsResponse, PostApplicationsByIdQueriesData, PostApplicationsByIdQueriesError, PostApplicationsByIdQueriesResponse, PostApplicationsData, PostApplicationsError, PostApplicationsResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -366,7 +366,7 @@ export const deleteApplicationsByIdMutation = (options?: Partial<Options<DeleteA
 export const getApplicationsByIdQueryKey = (options: Options<GetApplicationsByIdData>) => createQueryKey('getApplicationsById', options);
 
 /**
- * Заявка со всеми запросами и привязанными СТЕ
+ * Заявка со всеми запросами и привязанными контрактами
  */
 export const getApplicationsByIdOptions = (options: Options<GetApplicationsByIdData>) => queryOptions<GetApplicationsByIdResponse, GetApplicationsByIdError, GetApplicationsByIdResponse, ReturnType<typeof getApplicationsByIdQueryKey>>({
     queryFn: async ({ queryKey, signal }) => {
@@ -416,12 +416,12 @@ export const deleteApplicationsByAppIdQueriesByQueryIdMutation = (options?: Part
 };
 
 /**
- * Привязать СТЕ к запросу
+ * Привязать контракт к запросу
  */
-export const postApplicationsByAppIdQueriesByQueryIdStesMutation = (options?: Partial<Options<PostApplicationsByAppIdQueriesByQueryIdStesData>>): UseMutationOptions<PostApplicationsByAppIdQueriesByQueryIdStesResponse, PostApplicationsByAppIdQueriesByQueryIdStesError, Options<PostApplicationsByAppIdQueriesByQueryIdStesData>> => {
-    const mutationOptions: UseMutationOptions<PostApplicationsByAppIdQueriesByQueryIdStesResponse, PostApplicationsByAppIdQueriesByQueryIdStesError, Options<PostApplicationsByAppIdQueriesByQueryIdStesData>> = {
+export const postApplicationsByAppIdQueriesByQueryIdContractsMutation = (options?: Partial<Options<PostApplicationsByAppIdQueriesByQueryIdContractsData>>): UseMutationOptions<PostApplicationsByAppIdQueriesByQueryIdContractsResponse, PostApplicationsByAppIdQueriesByQueryIdContractsError, Options<PostApplicationsByAppIdQueriesByQueryIdContractsData>> => {
+    const mutationOptions: UseMutationOptions<PostApplicationsByAppIdQueriesByQueryIdContractsResponse, PostApplicationsByAppIdQueriesByQueryIdContractsError, Options<PostApplicationsByAppIdQueriesByQueryIdContractsData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await postApplicationsByAppIdQueriesByQueryIdStes({
+            const { data } = await postApplicationsByAppIdQueriesByQueryIdContracts({
                 ...options,
                 ...fnOptions,
                 throwOnError: true
@@ -433,12 +433,12 @@ export const postApplicationsByAppIdQueriesByQueryIdStesMutation = (options?: Pa
 };
 
 /**
- * Отвязать СТЕ от запроса
+ * Отвязать контракт от запроса
  */
-export const deleteApplicationsByAppIdQueriesByQueryIdStesBySteIdMutation = (options?: Partial<Options<DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdData>>): UseMutationOptions<DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdResponse, DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdError, Options<DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdData>> => {
-    const mutationOptions: UseMutationOptions<DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdResponse, DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdError, Options<DeleteApplicationsByAppIdQueriesByQueryIdStesBySteIdData>> = {
+export const deleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdMutation = (options?: Partial<Options<DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdData>>): UseMutationOptions<DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdResponse, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdError, Options<DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdData>> => {
+    const mutationOptions: UseMutationOptions<DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdResponse, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdError, Options<DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdData>> = {
         mutationFn: async (fnOptions) => {
-            const { data } = await deleteApplicationsByAppIdQueriesByQueryIdStesBySteId({
+            const { data } = await deleteApplicationsByAppIdQueriesByQueryIdContractsByContractId({
                 ...options,
                 ...fnOptions,
                 throwOnError: true

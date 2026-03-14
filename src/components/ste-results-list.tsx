@@ -15,7 +15,7 @@ interface SteResultsListProps {
   queryData: ApplicationQueryFull | undefined
   appId: number
   queryId: number
-  onLink: (steId: number, rank: number) => void
+  onLink: (contractId: number) => void
   linkingId: number | null
 }
 
@@ -29,7 +29,7 @@ export function SteResultsList({
   onLink,
   linkingId,
 }: SteResultsListProps) {
-  const linkedSteIds = new Set(queryData?.stes?.map((s) => s.steId))
+  const linkedContractIds = new Set(queryData?.contracts?.map((c) => c.contractId).filter((id): id is number => id !== undefined))
 
   const handleIntersect = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage()
@@ -66,8 +66,8 @@ export function SteResultsList({
         <SteCard
           key={item.ste_id}
           item={item}
-          isLinked={item.ste_id !== undefined && linkedSteIds.has(item.ste_id)}
-          isPending={linkingId === item.ste_id}
+          linkedContractIds={linkedContractIds}
+          linkingId={linkingId}
           onLink={onLink}
         />
       ))}
