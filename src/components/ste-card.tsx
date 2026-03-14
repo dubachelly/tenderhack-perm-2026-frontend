@@ -17,7 +17,7 @@ interface SteCardProps {
 export function SteCard({ item, linkedContractIds, onLink, onUnlink, linkingId }: SteCardProps) {
   const [modalOpen, setModalOpen] = useState(false)
 
-  const contractIds = item.contract_ids ?? []
+  const contractIds = item.contract_item_ids ?? []
   const selectedCount = contractIds.filter((id) => linkedContractIds.has(id)).length
   const totalCount = contractIds.length
   const hasSelected = selectedCount > 0

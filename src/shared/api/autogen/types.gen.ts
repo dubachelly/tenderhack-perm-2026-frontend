@@ -98,7 +98,7 @@ export type ApplicationFull = Application & {
 };
 
 /**
- * СТЕ с массивом id контрактов, в которых она встречается (пустой массив если контрактов нет)
+ * СТЕ с массивом id позиций контрактов, в которых она встречается (пустой массив если контрактов нет)
  */
 export type SearchSteGroup = {
     ste_id?: number;
@@ -111,9 +111,9 @@ export type SearchSteGroup = {
      */
     rank?: number;
     /**
-     * Массив id контрактов, содержащих данную СТЕ
+     * Массив id позиций контрактов (contract_items), содержащих данную СТЕ
      */
-    contract_ids?: Array<number>;
+    contract_item_ids?: Array<number>;
 };
 
 /**

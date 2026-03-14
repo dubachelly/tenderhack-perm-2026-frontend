@@ -84,31 +84,48 @@ function ContractTable({
       <TableHeader>
         <TableRow className="text-muted-foreground">
           <TableHead className="sticky left-0 z-10 w-8 bg-background" />
-          <TableHead className="min-w-48 font-normal">Наименование закупки</TableHead>
-          <TableHead className="text-right font-normal">Начальная стоимость</TableHead>
-          <TableHead className="text-right font-normal">Конечная стоимость</TableHead>
-          <TableHead className="text-right font-normal">Снижение стоимости</TableHead>
+          <TableHead className="min-w-48 font-normal">
+            Наименование закупки
+          </TableHead>
+          <TableHead className="text-right font-normal">
+            Начальная стоимость
+          </TableHead>
+          <TableHead className="text-right font-normal">
+            Конечная стоимость
+          </TableHead>
+          <TableHead className="text-right font-normal">
+            Снижение стоимости
+          </TableHead>
           <TableHead className="text-right font-normal">НДС</TableHead>
-          <TableHead className="text-right font-normal">Дата заключения</TableHead>
+          <TableHead className="text-right font-normal">
+            Дата заключения
+          </TableHead>
           <TableHead className="font-normal">Регион заказчика</TableHead>
+          <TableHead className="font-normal">Регион поставщика</TableHead>
           <TableHead className="text-right font-normal">Количество</TableHead>
-          <TableHead className="text-right font-normal">Цена за ед., ₽</TableHead>
+          <TableHead className="text-right font-normal">
+            Цена за ед., ₽
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
         {contracts.map((c) => {
           const itemId = c.item_id
-          const linked =
-            itemId !== undefined && linkedContractIds.has(itemId)
+          const linked = itemId !== undefined && linkedContractIds.has(itemId)
           const pending = itemId !== undefined && linkingId === itemId
           return (
-            <TableRow key={c.item_id ?? c.contract_id} className="border-border/50">
+            <TableRow
+              key={c.item_id ?? c.contract_id}
+              className="border-border/50"
+            >
               <TableCell className="sticky left-0 z-10 bg-background py-1.5 pr-2">
                 <Button
                   size="icon-sm"
                   variant={linked ? "secondary" : "default"}
                   disabled={pending || !itemId}
-                  onClick={() => itemId && (linked ? onUnlink(itemId) : onLink(itemId))}
+                  onClick={() =>
+                    itemId && (linked ? onUnlink(itemId) : onLink(itemId))
+                  }
                 >
                   {pending ? (
                     <Loader2 className="size-3 animate-spin" />
@@ -137,8 +154,9 @@ function ContractTable({
               <TableCell className="py-1.5 text-right">
                 {formatDate(c.contract_signing_date)}
               </TableCell>
+              <TableCell className="py-1.5">{c.buyer_region ?? "—"}</TableCell>
               <TableCell className="py-1.5">
-                {c.buyer_region ?? "—"}
+                {c.supplier_region ?? "—"}
               </TableCell>
               <TableCell className="py-1.5 text-right">
                 {c.quantity != null
@@ -185,11 +203,23 @@ export function SteDetailModal({
   )
 
   const supplierOptions = useMemo(
-    () => [...new Set(otherContracts.map((c) => c.supplier_region).filter((v): v is string => !!v))],
+    () => [
+      ...new Set(
+        otherContracts
+          .map((c) => c.supplier_region)
+          .filter((v): v is string => !!v)
+      ),
+    ],
     [otherContracts]
   )
   const methodOptions = useMemo(
-    () => [...new Set(otherContracts.map((c) => c.procurement_method).filter((v): v is string => !!v))],
+    () => [
+      ...new Set(
+        otherContracts
+          .map((c) => c.procurement_method)
+          .filter((v): v is string => !!v)
+      ),
+    ],
     [otherContracts]
   )
 
@@ -198,9 +228,15 @@ export function SteDetailModal({
 
   const filteredOtherContracts = useMemo(() => {
     return otherContracts.filter((c) => {
-      if (supplierFilter.length > 0 && !supplierFilter.includes(c.supplier_region ?? ""))
+      if (
+        supplierFilter.length > 0 &&
+        !supplierFilter.includes(c.supplier_region ?? "")
+      )
         return false
-      if (methodFilter.length > 0 && !methodFilter.includes(c.procurement_method ?? ""))
+      if (
+        methodFilter.length > 0 &&
+        !methodFilter.includes(c.procurement_method ?? "")
+      )
         return false
       if (periodFrom || periodTo) {
         const signDate = c.contract_signing_date?.slice(0, 10) ?? null
@@ -323,11 +359,13 @@ export function SteDetailModal({
                       </div>
                     )}
                   </div>
-                  {hasActiveFilters && filteredOtherContracts.length !== otherContracts.length && (
-                    <p className="mb-2 text-xs text-muted-foreground">
-                      Показано {filteredOtherContracts.length} из {otherContracts.length}
-                    </p>
-                  )}
+                  {hasActiveFilters &&
+                    filteredOtherContracts.length !== otherContracts.length && (
+                      <p className="mb-2 text-xs text-muted-foreground">
+                        Показано {filteredOtherContracts.length} из{" "}
+                        {otherContracts.length}
+                      </p>
+                    )}
                   <ContractTable
                     contracts={filteredOtherContracts}
                     linkedContractIds={linkedContractIds}
