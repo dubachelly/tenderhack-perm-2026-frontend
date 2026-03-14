@@ -1,5 +1,5 @@
 import { useRef, useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useParams, Link } from "react-router";
 import { useInfiniteQuery, useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ShoppingBasket } from "lucide-react";
 
@@ -9,10 +9,16 @@ import {
   getSearchItemsInfiniteOptions,
   postApplicationsByAppIdQueriesByQueryIdContractsMutation,
 } from "@/shared/api/autogen/@tanstack/react-query.gen";
-import { SearchBar } from "@/components/search-bar";
+import {
+  Breadcrumb,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
+} from "@/components/ui/breadcrumb";
 import { SteResultsList } from "@/components/ste-results-list";
 import { ScrollToTopButton } from "@/components/scroll-to-top-button";
-import { useAddQueryToApplication } from "@/hooks/use-add-query-to-application";
 
 export function QueryPage() {
   const { appId, queryId } = useParams<{ appId: string; queryId: string }>();
@@ -61,15 +67,6 @@ export function QueryPage() {
     },
   });
 
-  const addQuery = useAddQueryToApplication();
-
-  const handleSearch = (q: string) => {
-    addQuery.mutate({
-      path: { id: numAppId },
-      body: { queryText: q },
-    });
-  };
-
   const handleLink = (contractId: number) => {
     linkMutation.mutate({
       path: { appId: numAppId, queryId: numQueryId },
@@ -79,19 +76,20 @@ export function QueryPage() {
 
   return (
     <div className="px-6 py-6 max-w-7xl mx-auto">
-      <div className="space-y-2 mb-6">
-        {app && (
-          <p className="text-xs text-muted-foreground">
-            Заявка:{" "}
-            <span className="font-medium text-foreground">{app.name}</span>
-          </p>
-        )}
-        <SearchBar
-          defaultValue={queryText}
-          onSearch={handleSearch}
-          placeholder="Новый поисковый запрос..."
-          className="w-full"
-        />
+      <div className="mb-6">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink asChild>
+                <Link to={`/applications/${numAppId}`}>{app?.name ?? "Заявка"}</Link>
+              </BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{queryText || "Запрос"}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
       </div>
 
       <div className="flex gap-6 items-start">
