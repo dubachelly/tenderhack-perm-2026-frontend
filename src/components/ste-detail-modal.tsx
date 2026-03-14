@@ -15,6 +15,14 @@ import {
 import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table"
 import { parseCharacteristics } from "@/lib/utils"
 import { MultiSelect } from "@/components/multi-select"
 import { DateRangePicker, toISODate } from "@/components/date-range-picker"
@@ -72,102 +80,79 @@ function ContractTable({
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-xs">
-        <thead>
-          <tr className="border-b text-muted-foreground">
-            <th className="sticky left-0 z-10 w-8 bg-background pr-2 pb-1" />
-            <th className="min-w-48 pr-3 pb-1 text-left font-normal">
-              Наименование закупки
-            </th>
-            <th className="pr-3 pb-1 text-right font-normal whitespace-nowrap">
-              Начальная стоимость
-            </th>
-            <th className="pr-3 pb-1 text-right font-normal whitespace-nowrap">
-              Конечная стоимость
-            </th>
-            <th className="pr-3 pb-1 text-right font-normal whitespace-nowrap">
-              Снижение стоимости
-            </th>
-            <th className="pr-3 pb-1 text-right font-normal whitespace-nowrap">
-              НДС
-            </th>
-            <th className="pr-3 pb-1 text-right font-normal whitespace-nowrap">
-              Дата заключения
-            </th>
-            <th className="pr-3 pb-1 text-left font-normal whitespace-nowrap">
-              Регион заказчика
-            </th>
-            <th className="pr-3 pb-1 text-right font-normal whitespace-nowrap">
-              Количество
-            </th>
-            <th className="pb-1 text-right font-normal whitespace-nowrap">
-              Цена за ед., ₽
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {contracts.map((c) => {
-            const contractId = c.contract_id
-            const linked =
-              contractId !== undefined && linkedContractIds.has(contractId)
-            const pending = contractId !== undefined && linkingId === contractId
-            return (
-              <tr
-                key={c.item_id ?? c.contract_id}
-                className="border-b border-border/50 last:border-0"
-              >
-                <td className="sticky left-0 z-10 bg-background py-1.5 pr-2">
-                  <Button
-                    size="icon-sm"
-                    variant={linked ? "secondary" : "default"}
-                    disabled={pending || !contractId}
-                    onClick={() => contractId && (linked ? onUnlink(contractId) : onLink(contractId))}
-                  >
-                    {pending ? (
-                      <Loader2 className="size-3 animate-spin" />
-                    ) : linked ? (
-                      <ArrowDown className="size-3" />
-                    ) : (
-                      <ArrowUp className="size-3" />
-                    )}
-                  </Button>
-                </td>
-                <td className="max-w-56 truncate py-1.5 pr-3">
-                  {c.procurement_name ?? "—"}
-                </td>
-                <td className="py-1.5 pr-3 text-right whitespace-nowrap">
-                  {formatCurrency(c.initial_contract_value)}
-                </td>
-                <td className="py-1.5 pr-3 text-right whitespace-nowrap">
-                  {formatCurrency(c.contract_value_after_signing)}
-                </td>
-                <td className="py-1.5 pr-3 text-right whitespace-nowrap">
-                  {formatPercent(c.reduction_percent)}
-                </td>
-                <td className="py-1.5 pr-3 text-right whitespace-nowrap">
-                  {formatPercent(c.vat_rate)}
-                </td>
-                <td className="py-1.5 pr-3 text-right whitespace-nowrap">
-                  {formatDate(c.contract_signing_date)}
-                </td>
-                <td className="py-1.5 pr-3 whitespace-nowrap">
-                  {c.buyer_region ?? "—"}
-                </td>
-                <td className="py-1.5 pr-3 text-right whitespace-nowrap">
-                  {c.quantity != null
-                    ? `${c.quantity.toLocaleString("ru-RU")} ${c.unit ?? ""}`.trim()
-                    : "—"}
-                </td>
-                <td className="py-1.5 text-right whitespace-nowrap">
-                  {formatCurrency(c.unit_price)}
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
+    <Table>
+      <TableHeader>
+        <TableRow className="text-muted-foreground">
+          <TableHead className="sticky left-0 z-10 w-8 bg-background" />
+          <TableHead className="min-w-48 font-normal">Наименование закупки</TableHead>
+          <TableHead className="text-right font-normal">Начальная стоимость</TableHead>
+          <TableHead className="text-right font-normal">Конечная стоимость</TableHead>
+          <TableHead className="text-right font-normal">Снижение стоимости</TableHead>
+          <TableHead className="text-right font-normal">НДС</TableHead>
+          <TableHead className="text-right font-normal">Дата заключения</TableHead>
+          <TableHead className="font-normal">Регион заказчика</TableHead>
+          <TableHead className="text-right font-normal">Количество</TableHead>
+          <TableHead className="text-right font-normal">Цена за ед., ₽</TableHead>
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {contracts.map((c) => {
+          const itemId = c.item_id
+          const linked =
+            itemId !== undefined && linkedContractIds.has(itemId)
+          const pending = itemId !== undefined && linkingId === itemId
+          return (
+            <TableRow key={c.item_id ?? c.contract_id} className="border-border/50">
+              <TableCell className="sticky left-0 z-10 bg-background py-1.5 pr-2">
+                <Button
+                  size="icon-sm"
+                  variant={linked ? "secondary" : "default"}
+                  disabled={pending || !itemId}
+                  onClick={() => itemId && (linked ? onUnlink(itemId) : onLink(itemId))}
+                >
+                  {pending ? (
+                    <Loader2 className="size-3 animate-spin" />
+                  ) : linked ? (
+                    <ArrowDown className="size-3" />
+                  ) : (
+                    <ArrowUp className="size-3" />
+                  )}
+                </Button>
+              </TableCell>
+              <TableCell className="py-1.5">
+                {c.procurement_name ?? "—"}
+              </TableCell>
+              <TableCell className="py-1.5 text-right">
+                {formatCurrency(c.initial_contract_value)}
+              </TableCell>
+              <TableCell className="py-1.5 text-right">
+                {formatCurrency(c.contract_value_after_signing)}
+              </TableCell>
+              <TableCell className="py-1.5 text-right">
+                {formatPercent(c.reduction_percent)}
+              </TableCell>
+              <TableCell className="py-1.5 text-right">
+                {formatPercent(c.vat_rate)}
+              </TableCell>
+              <TableCell className="py-1.5 text-right">
+                {formatDate(c.contract_signing_date)}
+              </TableCell>
+              <TableCell className="py-1.5">
+                {c.buyer_region ?? "—"}
+              </TableCell>
+              <TableCell className="py-1.5 text-right">
+                {c.quantity != null
+                  ? `${c.quantity.toLocaleString("ru-RU")} ${c.unit ?? ""}`.trim()
+                  : "—"}
+              </TableCell>
+              <TableCell className="py-1.5 text-right">
+                {formatCurrency(c.unit_price)}
+              </TableCell>
+            </TableRow>
+          )
+        })}
+      </TableBody>
+    </Table>
   )
 }
 
@@ -193,10 +178,10 @@ export function SteDetailModal({
 
   const contracts = data?.data ?? []
   const selectedContracts = contracts.filter(
-    (c) => c.contract_id !== undefined && linkedContractIds.has(c.contract_id)
+    (c) => c.item_id !== undefined && linkedContractIds.has(c.item_id)
   )
   const otherContracts = contracts.filter(
-    (c) => c.contract_id === undefined || !linkedContractIds.has(c.contract_id)
+    (c) => c.item_id === undefined || !linkedContractIds.has(c.item_id)
   )
 
   const supplierOptions = useMemo(

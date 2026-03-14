@@ -61,11 +61,17 @@ export type ApplicationQuery = {
 
 export type ApplicationQueryContract = {
     queryId?: number;
-    contractId?: number;
+    contractItemId?: number;
 };
 
 export type ApplicationQueryContractWithContract = {
     queryId?: number;
+    contractItemId?: number;
+    steId?: number | null;
+    steItemName?: string | null;
+    quantity?: number | null;
+    unit?: string | null;
+    unitPrice?: number | null;
     contractId?: number;
     procurementName?: string | null;
     procurementMethod?: string | null;
@@ -675,7 +681,7 @@ export type DeleteApplicationsByAppIdQueriesByQueryIdResponse = DeleteApplicatio
 
 export type PostApplicationsByAppIdQueriesByQueryIdContractsData = {
     body: {
-        contractId: number;
+        contractItemId: number;
     };
     path: {
         appId: number;
@@ -711,18 +717,18 @@ export type PostApplicationsByAppIdQueriesByQueryIdContractsResponses = {
 
 export type PostApplicationsByAppIdQueriesByQueryIdContractsResponse = PostApplicationsByAppIdQueriesByQueryIdContractsResponses[keyof PostApplicationsByAppIdQueriesByQueryIdContractsResponses];
 
-export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdData = {
+export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdData = {
     body?: never;
     path: {
         appId: number;
         queryId: number;
-        contractId: number;
+        contractItemId: number;
     };
     query?: never;
-    url: '/applications/{appId}/queries/{queryId}/contracts/{contractId}';
+    url: '/applications/{appId}/queries/{queryId}/contracts/{contractItemId}';
 };
 
-export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdErrors = {
+export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdErrors = {
     /**
      * Error
      */
@@ -737,9 +743,9 @@ export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdErrors
     500: Error;
 };
 
-export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdError = DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdErrors[keyof DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdErrors];
+export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdError = DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdErrors[keyof DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdErrors];
 
-export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdResponses = {
+export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdResponses = {
     /**
      * OK
      */
@@ -748,7 +754,7 @@ export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdRespon
     };
 };
 
-export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdResponse = DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdResponses[keyof DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdResponses];
+export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdResponse = DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdResponses[keyof DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdResponses];
 
 export type GetSearchItemsData = {
     body?: never;

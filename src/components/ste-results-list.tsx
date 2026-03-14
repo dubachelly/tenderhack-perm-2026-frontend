@@ -31,7 +31,7 @@ export function SteResultsList({
   onUnlink,
   linkingId,
 }: SteResultsListProps) {
-  const linkedContractIds = new Set(queryData?.contracts?.map((c) => c.contractId).filter((id): id is number => id !== undefined))
+  const linkedContractIds = new Set(queryData?.contracts?.map((c) => c.contractItemId).filter((id): id is number => id !== undefined))
 
   const handleIntersect = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) fetchNextPage()

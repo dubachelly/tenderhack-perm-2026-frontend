@@ -1,9 +1,9 @@
-import { Outlet, useNavigate } from "react-router";
-import { Plus, History } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Outlet, useNavigate } from "react-router"
+import { Plus, History } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export function RootLayout() {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
   return (
     <div className="h-svh overflow-hidden">
@@ -11,10 +11,10 @@ export function RootLayout() {
         <Outlet />
       </main>
 
-      <div className="fixed bottom-6 right-6 flex flex-col items-center gap-3 z-50">
+      <div className="fixed right-6 bottom-20 z-50 flex flex-col items-center gap-3">
         <Button
           size="icon"
-          variant="outline"
+          variant="secondary"
           onClick={() => navigate("/history")}
           className="size-10 rounded-full shadow-md"
           title="История заявок"
@@ -31,5 +31,5 @@ export function RootLayout() {
         </Button>
       </div>
     </div>
-  );
+  )
 }
