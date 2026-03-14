@@ -2,26 +2,31 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 
 import {
-  postApplicationsMutation,
-  getApplicationsByIdOptions,
-  getApplicationsQueryKey,
-} from "@/shared/api/autogen/@tanstack/react-query.gen";
+  postApplications,
+  postApplicationsByIdQueries,
+} from "@/shared/api/autogen/sdk.gen";
+import { getApplicationsQueryKey } from "@/shared/api/autogen/@tanstack/react-query.gen";
 
 export function useCreateApplicationWithQuery() {
   const qc = useQueryClient();
   const navigate = useNavigate();
 
   return useMutation({
-    ...postApplicationsMutation(),
-    onSuccess: async (app) => {
+    mutationFn: async (queryText: string) => {
+      const app = await postApplications({
+        body: { name: queryText },
+        throwOnError: true,
+      });
+      const query = await postApplicationsByIdQueries({
+        path: { id: app.data.id! },
+        body: { queryText },
+        throwOnError: true,
+      });
+      return { app: app.data, query: query.data };
+    },
+    onSuccess: async ({ app, query }) => {
       await qc.invalidateQueries({ queryKey: getApplicationsQueryKey() });
-      const full = await qc.fetchQuery(
-        getApplicationsByIdOptions({ path: { id: app.id! } })
-      );
-      const firstQuery = full.queries?.[0];
-      if (firstQuery) {
-        navigate(`/applications/${app.id}/queries/${firstQuery.id}`);
-      }
+      navigate(`/applications/${app.id}/queries/${query.id}`);
     },
   });
 }

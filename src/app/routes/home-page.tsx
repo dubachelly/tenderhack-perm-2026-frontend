@@ -28,9 +28,7 @@ export function HomePage() {
         body: { queryText: query },
       });
     } else {
-      createApp.mutate({
-        body: { name: query, queries: [query] },
-      });
+      createApp.mutate(query);
     }
   };
 
