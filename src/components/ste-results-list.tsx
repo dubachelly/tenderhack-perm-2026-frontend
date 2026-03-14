@@ -16,6 +16,7 @@ interface SteResultsListProps {
   appId: number
   queryId: number
   onLink: (contractId: number) => void
+  onUnlink: (contractId: number) => void
   linkingId: number | null
 }
 
@@ -27,6 +28,7 @@ export function SteResultsList({
   fetchNextPage,
   queryData,
   onLink,
+  onUnlink,
   linkingId,
 }: SteResultsListProps) {
   const linkedContractIds = new Set(queryData?.contracts?.map((c) => c.contractId).filter((id): id is number => id !== undefined))
@@ -69,6 +71,7 @@ export function SteResultsList({
           linkedContractIds={linkedContractIds}
           linkingId={linkingId}
           onLink={onLink}
+          onUnlink={onUnlink}
         />
       ))}
       <div ref={sentinelRef} className="h-1" />

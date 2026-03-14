@@ -11,6 +11,7 @@ import {
   getContractsProcurementMethodsOptions,
   getSteCategoriesOptions,
   postApplicationsByAppIdQueriesByQueryIdContractsMutation,
+  deleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdMutation,
 } from "@/shared/api/autogen/@tanstack/react-query.gen";
 import {
   Breadcrumb,
@@ -96,10 +97,27 @@ export function QueryPage() {
     },
   });
 
+  const unlinkMutation = useMutation({
+    ...deleteApplicationsByAppIdQueriesByQueryIdContractsByContractIdMutation(),
+    onMutate: (vars) => setLinkingId(vars.path.contractId),
+    onSettled: () => setLinkingId(null),
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: getApplicationsByIdQueryKey({ path: { id: numAppId } }),
+      });
+    },
+  });
+
   const handleLink = (contractId: number) => {
     linkMutation.mutate({
       path: { appId: numAppId, queryId: numQueryId },
       body: { contractId },
+    });
+  };
+
+  const handleUnlink = (contractId: number) => {
+    unlinkMutation.mutate({
+      path: { appId: numAppId, queryId: numQueryId, contractId },
     });
   };
 
@@ -203,6 +221,7 @@ export function QueryPage() {
               appId={numAppId}
               queryId={numQueryId}
               onLink={handleLink}
+              onUnlink={handleUnlink}
               linkingId={linkingId}
             />
           ) : (

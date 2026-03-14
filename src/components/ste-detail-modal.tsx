@@ -26,6 +26,7 @@ interface SteDetailModalProps {
   item: SearchSteGroup
   linkedContractIds: Set<number>
   onLink: (contractId: number) => void
+  onUnlink: (contractId: number) => void
   linkingId: number | null
 }
 
@@ -57,11 +58,13 @@ function ContractTable({
   contracts,
   linkedContractIds,
   onLink,
+  onUnlink,
   linkingId,
 }: {
   contracts: SteContractRow[]
   linkedContractIds: Set<number>
   onLink: (contractId: number) => void
+  onUnlink: (contractId: number) => void
   linkingId: number | null
 }) {
   if (contracts.length === 0) {
@@ -119,7 +122,7 @@ function ContractTable({
                     size="icon-sm"
                     variant={linked ? "secondary" : "default"}
                     disabled={pending || !contractId}
-                    onClick={() => contractId && onLink(contractId)}
+                    onClick={() => contractId && (linked ? onUnlink(contractId) : onLink(contractId))}
                   >
                     {pending ? (
                       <Loader2 className="size-3 animate-spin" />
@@ -174,6 +177,7 @@ export function SteDetailModal({
   item,
   linkedContractIds,
   onLink,
+  onUnlink,
   linkingId,
 }: SteDetailModalProps) {
   const characteristics = parseCharacteristics(item.ste_characteristics)
@@ -285,6 +289,7 @@ export function SteDetailModal({
                     contracts={selectedContracts}
                     linkedContractIds={linkedContractIds}
                     onLink={onLink}
+                    onUnlink={onUnlink}
                     linkingId={linkingId}
                   />
                 </section>
@@ -342,6 +347,7 @@ export function SteDetailModal({
                     contracts={filteredOtherContracts}
                     linkedContractIds={linkedContractIds}
                     onLink={onLink}
+                    onUnlink={onUnlink}
                     linkingId={linkingId}
                   />
                 </section>

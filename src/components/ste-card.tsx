@@ -10,10 +10,11 @@ interface SteCardProps {
   item: SearchSteGroup
   linkedContractIds: Set<number>
   onLink: (contractId: number) => void
+  onUnlink: (contractId: number) => void
   linkingId: number | null
 }
 
-export function SteCard({ item, linkedContractIds, onLink, linkingId }: SteCardProps) {
+export function SteCard({ item, linkedContractIds, onLink, onUnlink, linkingId }: SteCardProps) {
   const [modalOpen, setModalOpen] = useState(false)
 
   const contractIds = item.contract_ids ?? []
@@ -67,6 +68,7 @@ export function SteCard({ item, linkedContractIds, onLink, linkingId }: SteCardP
         item={item}
         linkedContractIds={linkedContractIds}
         onLink={onLink}
+        onUnlink={onUnlink}
         linkingId={linkingId}
       />
     </>
