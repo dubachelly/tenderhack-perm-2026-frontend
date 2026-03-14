@@ -31,7 +31,7 @@ export function ScrollToTopButton({
       variant="secondary"
       onClick={handleClick}
       className={cn(
-        "fixed bottom-20 left-6 z-50 shadow-md transition-all duration-200",
+        "fixed bottom-20 left-20 z-50 shadow-md transition-all duration-200",
         visible
           ? "translate-y-0 opacity-100"
           : "pointer-events-none translate-y-2 opacity-0"

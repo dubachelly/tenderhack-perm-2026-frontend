@@ -6,7 +6,7 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query"
-import { SlidersHorizontal } from "lucide-react"
+import { SlidersHorizontal, Plus } from "lucide-react"
 
 import {
   getApplicationsByIdOptions,
@@ -252,7 +252,16 @@ export function QueryPage() {
         contracts={linkedContracts}
         appName={app?.name ?? ""}
         queryText={queryText}
+        onRemove={handleUnlink}
       />
+
+      <Link
+        title="Добавить товар в заявку"
+        to={`/?appId=${numAppId}`}
+        className="fixed right-10 bottom-20 z-50 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-opacity hover:opacity-90"
+      >
+        <Plus className="size-6" />
+      </Link>
 
       <ScrollToTopButton scrollContainerRef={scrollRef} />
     </div>
