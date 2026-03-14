@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
 import { ArrowUp, ArrowDown, Loader2, SlidersHorizontal } from "lucide-react"
 import type {
@@ -9,6 +9,7 @@ import { getSearchSteBySteIdContractsOptions } from "@/shared/api/autogen/@tanst
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
@@ -162,9 +163,40 @@ export function SteDetailModal({
 }: SteDetailModalProps) {
   const characteristics = parseCharacteristics(item.ste_characteristics)
 
+  const [pendingLinkedIds, setPendingLinkedIds] = useState<Set<number>>(
+    () => new Set(linkedContractIds)
+  )
   const [supplierFilter, setSupplierFilter] = useState<string[]>([])
   const [methodFilter, setMethodFilter] = useState<string[]>([])
   const [dateRange, setDateRange] = useState<DateRange | undefined>()
+
+  useEffect(() => {
+    if (open) {
+      setPendingLinkedIds(new Set(linkedContractIds))
+    }
+  }, [open]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleLocalLink = (contractId: number) => {
+    setPendingLinkedIds((prev) => new Set([...prev, contractId]))
+  }
+
+  const handleLocalUnlink = (contractId: number) => {
+    setPendingLinkedIds((prev) => {
+      const next = new Set(prev)
+      next.delete(contractId)
+      return next
+    })
+  }
+
+  const handleSave = () => {
+    for (const id of pendingLinkedIds) {
+      if (!linkedContractIds.has(id)) onLink(id)
+    }
+    for (const id of linkedContractIds) {
+      if (!pendingLinkedIds.has(id)) onUnlink(id)
+    }
+    onOpenChange(false)
+  }
 
   const { data, isLoading } = useQuery({
     ...getSearchSteBySteIdContractsOptions({ path: { steId: item.ste_id! } }),
@@ -173,10 +205,10 @@ export function SteDetailModal({
 
   const contracts = data?.data ?? []
   const selectedContracts = contracts.filter(
-    (c) => c.item_id !== undefined && linkedContractIds.has(c.item_id)
+    (c) => c.item_id !== undefined && pendingLinkedIds.has(c.item_id)
   )
   const otherContracts = contracts.filter(
-    (c) => c.item_id === undefined || !linkedContractIds.has(c.item_id)
+    (c) => c.item_id === undefined || !pendingLinkedIds.has(c.item_id)
   )
 
   const supplierOptions = useMemo(
@@ -297,10 +329,10 @@ export function SteDetailModal({
                   </h3>
                   <ContractTable
                     contracts={selectedContracts}
-                    linkedContractIds={linkedContractIds}
-                    onLink={onLink}
-                    onUnlink={onUnlink}
-                    linkingId={linkingId}
+                    linkedContractIds={pendingLinkedIds}
+                    onLink={handleLocalLink}
+                    onUnlink={handleLocalUnlink}
+                    linkingId={null}
                   />
                 </section>
 
@@ -363,16 +395,23 @@ export function SteDetailModal({
                     )}
                   <ContractTable
                     contracts={filteredOtherContracts}
-                    linkedContractIds={linkedContractIds}
-                    onLink={onLink}
-                    onUnlink={onUnlink}
-                    linkingId={linkingId}
+                    linkedContractIds={pendingLinkedIds}
+                    onLink={handleLocalLink}
+                    onUnlink={handleLocalUnlink}
+                    linkingId={null}
                   />
                 </section>
               </>
             )}
           </div>
         </ScrollArea>
+
+        <DialogFooter className="border-t px-6 py-4">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Отмена
+          </Button>
+          <Button onClick={handleSave}>Сохранить</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   )
