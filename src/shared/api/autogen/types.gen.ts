@@ -359,6 +359,31 @@ export type GetContractsBuyerRegionsResponses = {
 
 export type GetContractsBuyerRegionsResponse = GetContractsBuyerRegionsResponses[keyof GetContractsBuyerRegionsResponses];
 
+export type GetContractsProcurementMethodsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/contracts/procurement-methods';
+};
+
+export type GetContractsProcurementMethodsErrors = {
+    /**
+     * Error
+     */
+    500: Error;
+};
+
+export type GetContractsProcurementMethodsError = GetContractsProcurementMethodsErrors[keyof GetContractsProcurementMethodsErrors];
+
+export type GetContractsProcurementMethodsResponses = {
+    /**
+     * OK
+     */
+    200: Array<string>;
+};
+
+export type GetContractsProcurementMethodsResponse = GetContractsProcurementMethodsResponses[keyof GetContractsProcurementMethodsResponses];
+
 export type GetContractsByIdData = {
     body?: never;
     path: {
@@ -730,6 +755,26 @@ export type GetSearchItemsData = {
          * Поисковый запрос (русский язык)
          */
         q: string;
+        /**
+         * Фильтр по категории продукции (можно несколько: ?category=A&category=B)
+         */
+        category?: Array<string>;
+        /**
+         * Фильтр по региону поставщика (можно несколько)
+         */
+        supplier_region?: Array<string>;
+        /**
+         * Начало периода подписания контракта (YYYY-MM-DD)
+         */
+        period_from?: string;
+        /**
+         * Конец периода подписания контракта (YYYY-MM-DD)
+         */
+        period_to?: string;
+        /**
+         * Фильтр по способу закупки (можно несколько)
+         */
+        procurement_method?: Array<string>;
     };
     url: '/search/items';
 };
@@ -766,7 +811,28 @@ export type GetSearchSteBySteIdContractsData = {
     path: {
         steId: number;
     };
-    query?: never;
+    query?: {
+        /**
+         * Фильтр по категории продукции (можно несколько: ?category=A&category=B)
+         */
+        category?: Array<string>;
+        /**
+         * Фильтр по региону поставщика (можно несколько)
+         */
+        supplier_region?: Array<string>;
+        /**
+         * Начало периода подписания контракта (YYYY-MM-DD)
+         */
+        period_from?: string;
+        /**
+         * Конец периода подписания контракта (YYYY-MM-DD)
+         */
+        period_to?: string;
+        /**
+         * Фильтр по способу закупки (можно несколько)
+         */
+        procurement_method?: Array<string>;
+    };
     url: '/search/ste/{steId}/contracts';
 };
 

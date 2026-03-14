@@ -1,5 +1,6 @@
+import { useMemo, useState } from "react"
 import { useQuery } from "@tanstack/react-query"
-import { ArrowUp, ArrowDown, Loader2 } from "lucide-react"
+import { ArrowUp, ArrowDown, Loader2, SlidersHorizontal } from "lucide-react"
 import type {
   SearchSteGroup,
   SteContractRow,
@@ -15,6 +16,9 @@ import { Button } from "@/components/ui/button"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Skeleton } from "@/components/ui/skeleton"
 import { parseCharacteristics } from "@/lib/utils"
+import { MultiSelect } from "@/components/multi-select"
+import { DateRangePicker, toISODate } from "@/components/date-range-picker"
+import type { DateRange } from "@/components/date-range-picker"
 
 interface SteDetailModalProps {
   open: boolean
@@ -174,6 +178,10 @@ export function SteDetailModal({
 }: SteDetailModalProps) {
   const characteristics = parseCharacteristics(item.ste_characteristics)
 
+  const [supplierFilter, setSupplierFilter] = useState<string[]>([])
+  const [methodFilter, setMethodFilter] = useState<string[]>([])
+  const [dateRange, setDateRange] = useState<DateRange | undefined>()
+
   const { data, isLoading } = useQuery({
     ...getSearchSteBySteIdContractsOptions({ path: { steId: item.ste_id! } }),
     enabled: open && !!item.ste_id,
@@ -186,6 +194,43 @@ export function SteDetailModal({
   const otherContracts = contracts.filter(
     (c) => c.contract_id === undefined || !linkedContractIds.has(c.contract_id)
   )
+
+  const supplierOptions = useMemo(
+    () => [...new Set(otherContracts.map((c) => c.supplier_region).filter((v): v is string => !!v))],
+    [otherContracts]
+  )
+  const methodOptions = useMemo(
+    () => [...new Set(otherContracts.map((c) => c.procurement_method).filter((v): v is string => !!v))],
+    [otherContracts]
+  )
+
+  const periodFrom = dateRange?.from ? toISODate(dateRange.from) : null
+  const periodTo = dateRange?.to ? toISODate(dateRange.to) : null
+
+  const filteredOtherContracts = useMemo(() => {
+    return otherContracts.filter((c) => {
+      if (supplierFilter.length > 0 && !supplierFilter.includes(c.supplier_region ?? ""))
+        return false
+      if (methodFilter.length > 0 && !methodFilter.includes(c.procurement_method ?? ""))
+        return false
+      if (periodFrom || periodTo) {
+        const signDate = c.contract_signing_date?.slice(0, 10) ?? null
+        if (!signDate) return false
+        if (periodFrom && signDate < periodFrom) return false
+        if (periodTo && signDate > periodTo) return false
+      }
+      return true
+    })
+  }, [otherContracts, supplierFilter, methodFilter, periodFrom, periodTo])
+
+  const hasActiveFilters =
+    supplierFilter.length > 0 || methodFilter.length > 0 || !!dateRange?.from
+
+  const resetFilters = () => {
+    setSupplierFilter([])
+    setMethodFilter([])
+    setDateRange(undefined)
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -245,11 +290,56 @@ export function SteDetailModal({
                 </section>
 
                 <section>
-                  <h3 className="mb-3 text-xs font-medium tracking-wide text-muted-foreground uppercase">
-                    Остальные контракты
-                  </h3>
+                  <div className="mb-3 flex flex-wrap items-center gap-x-3 gap-y-2">
+                    <h3 className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
+                      Остальные контракты
+                    </h3>
+                    {otherContracts.length > 0 && (
+                      <div className="ml-auto flex flex-wrap items-center gap-2">
+                        <SlidersHorizontal className="size-3.5 text-muted-foreground" />
+                        <div className="w-44">
+                          <MultiSelect
+                            items={supplierOptions}
+                            value={supplierFilter}
+                            onValueChange={setSupplierFilter}
+                            placeholder="Регион поставщика"
+                          />
+                        </div>
+                        <div className="w-44">
+                          <MultiSelect
+                            items={methodOptions}
+                            value={methodFilter}
+                            onValueChange={setMethodFilter}
+                            placeholder="Способ закупки"
+                          />
+                        </div>
+                        <div className="w-48">
+                          <DateRangePicker
+                            value={dateRange}
+                            onChange={setDateRange}
+                            placeholder="Период заключения"
+                          />
+                        </div>
+                        {hasActiveFilters && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 text-xs"
+                            onClick={resetFilters}
+                          >
+                            Сбросить
+                          </Button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {hasActiveFilters && filteredOtherContracts.length !== otherContracts.length && (
+                    <p className="mb-2 text-xs text-muted-foreground">
+                      Показано {filteredOtherContracts.length} из {otherContracts.length}
+                    </p>
+                  )}
                   <ContractTable
-                    contracts={otherContracts}
+                    contracts={filteredOtherContracts}
                     linkedContractIds={linkedContractIds}
                     onLink={onLink}
                     linkingId={linkingId}
