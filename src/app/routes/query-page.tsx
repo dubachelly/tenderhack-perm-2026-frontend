@@ -102,8 +102,11 @@ export function QueryPage() {
   }, [queryText])
 
   useEffect(() => {
+    const trimmed = searchInput.trim()
     const timer = setTimeout(() => {
-      setDebouncedSearch(searchInput.trim())
+      if (trimmed.length === 0 || trimmed.length >= 3) {
+        setDebouncedSearch(trimmed)
+      }
     }, 400)
     return () => clearTimeout(timer)
   }, [searchInput])
@@ -287,7 +290,7 @@ export function QueryPage() {
         </Breadcrumb>
       </div>
 
-      <InputGroup className="mb-4 rounded-md h-9">
+      <InputGroup className="mb-1 h-9 rounded-md">
         <InputGroupAddon>
           <Search />
         </InputGroupAddon>
@@ -297,6 +300,11 @@ export function QueryPage() {
           onChange={(e) => setSearchInput(e.target.value)}
         />
       </InputGroup>
+      <p className="mb-3 min-h-[1rem] text-xs text-muted-foreground">
+        {searchInput.trim().length > 0 && searchInput.trim().length < 3
+          ? "Введите не менее 3 символов"
+          : ""}
+      </p>
 
       <div className="mb-4 rounded-lg border bg-card p-4">
         <div className="mb-3 flex items-center gap-2">
@@ -356,19 +364,29 @@ export function QueryPage() {
 
       <div className="pb-14">
         {debouncedSearch ? (
-          <SteResultsList
-            data={data}
-            isLoading={isLoading}
-            isFetchingNextPage={isFetchingNextPage}
-            hasNextPage={!!hasNextPage}
-            fetchNextPage={fetchNextPage}
-            queryData={currentQuery}
-            appId={numAppId}
-            queryId={numQueryId}
-            onLink={handleLink}
-            onUnlink={handleUnlink}
-            linkingId={linkingId}
-          />
+          <>
+            {!isLoading &&
+              data &&
+              data.pages[0]?.total !== undefined &&
+              data.pages[0].total > 0 && (
+                <p className="mb-3 text-sm text-muted-foreground">
+                  Найдено СТЕ: {(data.pages[0]?.total as number) ?? 0}
+                </p>
+              )}
+            <SteResultsList
+              data={data}
+              isLoading={isLoading}
+              isFetchingNextPage={isFetchingNextPage}
+              hasNextPage={!!hasNextPage}
+              fetchNextPage={fetchNextPage}
+              queryData={currentQuery}
+              appId={numAppId}
+              queryId={numQueryId}
+              onLink={handleLink}
+              onUnlink={handleUnlink}
+              linkingId={linkingId}
+            />
+          </>
         ) : (
           <div className="flex items-center justify-center py-20 text-sm text-muted-foreground">
             Загрузка...
