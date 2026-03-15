@@ -34,10 +34,13 @@ export function HomePage() {
   return (
     <div className="flex min-h-full flex-col items-center justify-center px-6 py-20">
       <div className="w-full max-w-2xl space-y-4">
-        <h1 className="text-center text-2xl font-semibold">
+        <h1
+          className="text-center text-2xl font-semibold"
+          style={{ textWrap: "pretty" }}
+        >
           {appId && app
-            ? `Добавить товар в заявку "${app.name}"`
-            : "Создать заявку"}
+            ? `Рассчитать НИЦК товара по заявке "${app.name}"`
+            : "Рассчитать НМЦК заявки"}
         </h1>
 
         <SearchBar
