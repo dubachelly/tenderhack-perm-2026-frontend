@@ -1,15 +1,21 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link, useParams } from "react-router"
-import { useQuery } from "@tanstack/react-query"
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
 import {
   Download,
   Pencil,
   Plus,
   TableOfContentsIcon,
+  Trash2,
   TriangleAlert,
 } from "lucide-react"
 
-import { getApplicationsByIdOptions } from "@/shared/api/autogen/@tanstack/react-query.gen"
+import {
+  getApplicationsByIdOptions,
+  getApplicationsByIdQueryKey,
+  deleteApplicationsByAppIdQueriesByQueryIdMutation,
+  deleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdMutation,
+} from "@/shared/api/autogen/@tanstack/react-query.gen"
 import type { ApplicationQueryContractWithContract } from "@/shared/api/autogen/types.gen"
 import {
   Breadcrumb,
@@ -88,9 +94,29 @@ export function ApplicationPage() {
     Record<number, string>
   >({})
 
+  const queryClient = useQueryClient()
+
   const { data: app, isLoading } = useQuery(
     getApplicationsByIdOptions({ path: { id: numAppId } })
   )
+
+  const deletePosition = useMutation({
+    ...deleteApplicationsByAppIdQueriesByQueryIdMutation(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: getApplicationsByIdQueryKey({ path: { id: numAppId } }),
+      })
+    },
+  })
+
+  const deleteContract = useMutation({
+    ...deleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdMutation(),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: getApplicationsByIdQueryKey({ path: { id: numAppId } }),
+      })
+    },
+  })
 
   const positions = useMemo<PositionGroup[]>(() => {
     if (!app?.queries) return []
@@ -356,9 +382,23 @@ export function ApplicationPage() {
                   >
                     {position.name}
                   </Link>
-                  <span className="text-xs text-muted-foreground">
-                    {position.contracts.length} контрактов
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs text-muted-foreground">
+                      {position.contracts.length} контрактов
+                    </span>
+                    <button
+                      onClick={() =>
+                        deletePosition.mutate({
+                          path: { appId: numAppId, queryId: position.id },
+                        })
+                      }
+                      disabled={deletePosition.isPending}
+                      className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded"
+                      title="Удалить товар"
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
                 </div>
                 {allSameSupplierInn && (
                   <Alert variant="destructive">
@@ -498,11 +538,12 @@ export function ApplicationPage() {
                           <TableHead>Дата подписания</TableHead>
                           <TableHead>Регион поставщика</TableHead>
                           <TableHead>ИНН поставщика</TableHead>
+                          <TableHead />
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {position.contracts.map((c) => (
-                          <TableRow key={c.contractItemId}>
+                          <TableRow key={c.contractItemId} className="group">
                             <TableCell>{c.steItemName ?? "—"}</TableCell>
                             <TableCell>{c.procurementMethod ?? "—"}</TableCell>
                             <TableCell className="tabular-nums">
@@ -513,6 +554,24 @@ export function ApplicationPage() {
                             </TableCell>
                             <TableCell>{c.supplierRegion ?? "—"}</TableCell>
                             <TableCell>{c.supplierInn ?? "—"}</TableCell>
+                            <TableCell className="w-8">
+                              <button
+                                onClick={() =>
+                                  deleteContract.mutate({
+                                    path: {
+                                      appId: numAppId,
+                                      queryId: position.id,
+                                      contractItemId: c.contractItemId!,
+                                    },
+                                  })
+                                }
+                                disabled={deleteContract.isPending}
+                                className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive p-1 rounded"
+                                title="Удалить контракт"
+                              >
+                                <Trash2 className="size-3.5" />
+                              </button>
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
