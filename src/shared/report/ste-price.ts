@@ -18,6 +18,7 @@ type StePriceItem = {
 type StePricePosition = {
   positionName: string
   positionPrice?: number
+  positionCount?: number
   items: StePriceItem[]
 }
 
@@ -33,15 +34,28 @@ export type StePricePositionInput = {
   name: string
   contracts: ApplicationQueryContractWithContract[]
   positionPrice?: number
+  positionCount?: number
 }
 
 const toNds = (vatRate?: number | string | null) => {
   if (vatRate === null || vatRate === undefined) return ""
-  if (typeof vatRate === "number") return `${vatRate}%`
+  if (typeof vatRate === "number") {
+    if (!Number.isFinite(vatRate)) return ""
+    const normalized = vatRate <= 1 ? vatRate * 100 : vatRate
+    return `${normalized}%`
+  }
   const s = String(vatRate).trim()
   if (!s) return ""
-  return s.endsWith("%") ? s : `${s}%`
+  if (/без\s*ндс/i.test(s)) return "Без НДС"
+  if (s.endsWith("%")) return s
+  const parsed = Number(s.replace(",", "."))
+  if (Number.isFinite(parsed)) {
+    const normalized = parsed <= 1 ? parsed * 100 : parsed
+    return `${normalized}%`
+  }
+  return s
 }
+
 
 export function buildStePricePayload({
   contractName,
@@ -61,6 +75,7 @@ export function buildStePricePayload({
           c.vatRate ??
           (c as { vat_rate?: number | string | null }).vat_rate ??
           (c as { nds?: number | string | null }).nds ??
+          (c as { NDS?: number | string | null }).NDS ??
           null
 
         return {
@@ -90,6 +105,7 @@ export function buildStePricePayload({
       return {
         positionName: p.name,
         positionPrice,
+        positionCount: p.positionCount,
         items,
       }
     })

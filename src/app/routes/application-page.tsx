@@ -233,6 +233,7 @@ export function ApplicationPage() {
           name: p.name,
           contracts: p.contracts,
           positionPrice: getPositionPrice(p),
+          positionCount: getQuantity(p.id),
         })),
       })
 
