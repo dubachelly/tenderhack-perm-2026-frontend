@@ -233,6 +233,7 @@ export function LinkedContractsSheet({
                   <TableHead>Цена за единицу</TableHead>
                   <TableHead>Дата подписания</TableHead>
                   <TableHead>Регион поставщика</TableHead>
+                  <TableHead>ИНН поставщика</TableHead>
                   {onRemove && <TableHead />}
                 </TableRow>
               </TableHeader>
@@ -246,6 +247,7 @@ export function LinkedContractsSheet({
                     </TableCell>
                     <TableCell>{formatDate(c.contractSigningDate)}</TableCell>
                     <TableCell>{c.supplierRegion ?? "—"}</TableCell>
+                    <TableCell>{c.supplierInn ?? "—"}</TableCell>
                     {onRemove && (
                       <TableCell className="w-8 pr-2">
                         <Button

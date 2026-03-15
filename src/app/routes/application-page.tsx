@@ -1,7 +1,13 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link, useParams } from "react-router"
 import { useQuery } from "@tanstack/react-query"
-import { Download, Pencil, Plus, TableOfContentsIcon } from "lucide-react"
+import {
+  Download,
+  Pencil,
+  Plus,
+  TableOfContentsIcon,
+  TriangleAlert,
+} from "lucide-react"
 
 import { getApplicationsByIdOptions } from "@/shared/api/autogen/@tanstack/react-query.gen"
 import type { ApplicationQueryContractWithContract } from "@/shared/api/autogen/types.gen"
@@ -30,6 +36,7 @@ import {
   updatePositionMeta,
   type PositionMeta,
 } from "@/shared/report/ste-price"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 function formatCurrency(value?: number | null) {
   if (value == null) return "—"
@@ -222,6 +229,14 @@ export function ApplicationPage() {
 
   const missingPositions = positions.length - positionsWithItems.length
 
+  const hasBlockingPositions = useMemo(() => {
+    return positions.some((p) => {
+      if (p.contracts.length <= 1) return false
+      const inns = p.contracts.map((c) => c.supplierInn)
+      return new Set(inns).size === 1
+    })
+  }, [positions])
+
   const handleDownload = async () => {
     if (!app) return
     setIsDownloading(true)
@@ -296,7 +311,9 @@ export function ApplicationPage() {
           <Button
             size="sm"
             onClick={handleDownload}
-            disabled={isDownloading || !hasReportablePositions}
+            disabled={
+              isDownloading || !hasReportablePositions || hasBlockingPositions
+            }
           >
             <Download className="mr-2 size-4" />
             Скачать отчёт
@@ -325,6 +342,10 @@ export function ApplicationPage() {
             const median = calcMedian(unitPrices)
             const computedNmck = median * quantity
             const manualNmck = getManualNmck(position.id)
+            const canEditPrice = position.contracts.length <= 1
+            const allSameSupplierInn =
+              position.contracts.length > 1 &&
+              new Set(position.contracts.map((c) => c.supplierInn)).size === 1
 
             return (
               <div key={position.id} className="rounded-lg border bg-card">
@@ -339,6 +360,17 @@ export function ApplicationPage() {
                     {position.contracts.length} контрактов
                   </span>
                 </div>
+                {allSameSupplierInn && (
+                  <Alert variant="destructive">
+                    <TriangleAlert />
+                    <AlertTitle>Единственный поставщик</AlertTitle>
+                    <AlertDescription>
+                      Все контракты по этой позиции были заключены с
+                      единственным поставщиком. Для обоснования цены необходимо
+                      минимум 2 различных поставщика.
+                    </AlertDescription>
+                  </Alert>
+                )}
                 <div className="space-y-3 p-4">
                   <div className="flex flex-wrap items-center gap-4 text-sm">
                     <div className="flex items-center gap-2">
@@ -376,16 +408,18 @@ export function ApplicationPage() {
                           <span className="font-medium tabular-nums">
                             {quantity}
                           </span>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-7 text-muted-foreground hover:text-foreground"
-                            onClick={() => startEditQuantity(position.id)}
-                            title="Редактировать количество"
-                            aria-label="Редактировать количество"
-                          >
-                            <Pencil className="size-3.5" />
-                          </Button>
+                          {canEditPrice && (
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-7 text-muted-foreground hover:text-foreground"
+                              onClick={() => startEditQuantity(position.id)}
+                              title="Редактировать количество"
+                              aria-label="Редактировать количество"
+                            >
+                              <Pencil className="size-3.5" />
+                            </Button>
+                          )}
                         </>
                       )}
                     </div>
@@ -463,6 +497,7 @@ export function ApplicationPage() {
                           <TableHead>Цена за единицу</TableHead>
                           <TableHead>Дата подписания</TableHead>
                           <TableHead>Регион поставщика</TableHead>
+                          <TableHead>ИНН поставщика</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -477,6 +512,7 @@ export function ApplicationPage() {
                               {formatDate(c.contractSigningDate)}
                             </TableCell>
                             <TableCell>{c.supplierRegion ?? "—"}</TableCell>
+                            <TableCell>{c.supplierInn ?? "—"}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>

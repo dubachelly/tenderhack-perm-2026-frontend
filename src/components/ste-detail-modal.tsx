@@ -75,7 +75,7 @@ function ContractTable({
     return <p className="py-2 text-xs text-muted-foreground">Нет закупок</p>
   }
 
-  const cols = "2rem minmax(0,2fr) auto auto minmax(0,1fr) minmax(0,1fr) auto auto"
+  const cols = "2rem minmax(0,2fr) auto auto minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) auto auto"
 
   return (
     <div className="text-xs" style={{ display: "grid", gridTemplateColumns: cols }}>
@@ -86,6 +86,7 @@ function ContractTable({
       <div className="py-1.5 pr-3 text-right font-normal text-muted-foreground">Дата</div>
       <div className="py-1.5 pr-3 font-normal text-muted-foreground">Регион заказчика</div>
       <div className="py-1.5 pr-3 font-normal text-muted-foreground">Регион поставщика</div>
+      <div className="py-1.5 pr-3 font-normal text-muted-foreground">ИНН поставщика</div>
       <div className="py-1.5 pr-3 text-right font-normal text-muted-foreground">Количество</div>
       <div className="py-1.5 text-right font-normal text-muted-foreground">Цена за ед.</div>
 
@@ -119,6 +120,7 @@ function ContractTable({
             <div className="border-t border-border/50 py-1.5 pr-3 text-right">{formatDate(c.contract_signing_date)}</div>
             <div className="border-t border-border/50 py-1.5 pr-3">{c.buyer_region ?? "—"}</div>
             <div className="border-t border-border/50 py-1.5 pr-3">{c.supplier_region ?? "—"}</div>
+            <div className="border-t border-border/50 py-1.5 pr-3">{c.supplier_inn ?? "—"}</div>
             <div className="border-t border-border/50 py-1.5 pr-3 text-right">
               {c.quantity != null
                 ? `${c.quantity.toLocaleString("ru-RU")} ${c.unit ?? ""}`.trim()
