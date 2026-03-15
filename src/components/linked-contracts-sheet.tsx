@@ -1,5 +1,7 @@
 import { useState } from "react"
 import { Download, TableOfContentsIcon, Trash2 } from "lucide-react"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Sheet,
   SheetContent,
@@ -30,8 +32,18 @@ function formatCurrency(value?: number | null) {
   return new Intl.NumberFormat("ru-RU", {
     style: "currency",
     currency: "RUB",
-    maximumFractionDigits: 0,
+    maximumFractionDigits: 2,
+    minimumFractionDigits: 2,
   }).format(value)
+}
+
+function calcMedian(values: number[]): number {
+  if (values.length === 0) return 0
+  const sorted = [...values].sort((a, b) => a - b)
+  const mid = Math.floor(sorted.length / 2)
+  return sorted.length % 2 === 0
+    ? (sorted[mid - 1] + sorted[mid]) / 2
+    : sorted[mid]
 }
 
 function formatDate(value?: string | null) {
@@ -97,6 +109,11 @@ export function LinkedContractsSheet({
   onRemove,
 }: LinkedContractsSheetProps) {
   const [isDownloading, setIsDownloading] = useState(false)
+  const [quantity, setQuantity] = useState(1)
+
+  const unitPrices = contracts.map((c) => c.unitPrice ?? 0).filter((p) => p > 0)
+  const median = calcMedian(unitPrices)
+  const nmck = quantity * median
 
   const handleDownload = async () => {
     setIsDownloading(true)
@@ -118,7 +135,7 @@ export function LinkedContractsSheet({
         </span>
       </SheetTrigger>
 
-      <SheetContent side="bottom" className="max-h-[60vh]">
+      <SheetContent side="bottom" className="flex max-h-[60vh] flex-col">
         <SheetHeader className="border-b pb-3">
           <SheetTitle className="flex items-center gap-2">
             <TableOfContentsIcon className="size-4 text-muted-foreground" />
@@ -129,21 +146,29 @@ export function LinkedContractsSheet({
               </span>
             )}
             {contracts.length > 0 && (
-              <Button
-                variant="outline"
-                size="sm"
-                className="mr-8 ml-auto"
-                disabled={isDownloading}
-                onClick={handleDownload}
-              >
-                <Download className="size-3.5" />
-                {isDownloading ? "Скачивание..." : "Скачать"}
-              </Button>
+              <div className="mr-8 ml-auto flex items-center gap-2">
+                <Label
+                  htmlFor="quantity"
+                  className="text-sm font-normal text-muted-foreground"
+                >
+                  Количество:
+                </Label>
+                <Input
+                  id="quantity"
+                  type="number"
+                  min={1}
+                  value={quantity}
+                  onChange={(e) =>
+                    setQuantity(Math.max(1, Number(e.target.value) || 1))
+                  }
+                  className="h-8 w-24"
+                />
+              </div>
             )}
           </SheetTitle>
         </SheetHeader>
 
-        <div className="overflow-auto px-4 py-4">
+        <div className="flex-1 overflow-auto px-4 py-4">
           {contracts.length === 0 ? (
             <p className="py-8 text-center text-sm text-muted-foreground">
               Нет привязанных контрактов
@@ -188,6 +213,14 @@ export function LinkedContractsSheet({
             </Table>
           )}
         </div>
+
+        {contracts.length > 0 && (
+          <div className="flex items-center justify-end border-t px-6 py-3">
+            <span className="text-2xl font-bold tabular-nums">
+              Расчётная НМЦК: {formatCurrency(nmck)}
+            </span>
+          </div>
+        )}
       </SheetContent>
     </Sheet>
   )
