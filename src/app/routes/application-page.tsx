@@ -155,7 +155,7 @@ export function ApplicationPage() {
       .map((c) => c.unitPrice ?? 0)
       .filter((price) => price > 0)
     const median = calcMedian(unitPrices)
-    if (position.contracts.length > 0) {
+    if (position.contracts.length > 1) {
       return median * quantity
     }
     return getManualNmck(position.id)
@@ -248,9 +248,15 @@ export function ApplicationPage() {
 
   const hasReportablePositions = useMemo(() => {
     return positions.some((p) => {
-      if (p.contracts.length > 0) return true
+      if (p.contracts.length > 1) return true
       return getManualNmck(p.id) > 0
     })
+  }, [positions, positionMeta])
+
+  const hasEditablePriceWithZeroNmck = useMemo(() => {
+    return positions.some(
+      (p) => p.contracts.length <= 1 && getManualNmck(p.id) === 0
+    )
   }, [positions, positionMeta])
 
   const missingPositions = positions.length - positionsWithItems.length
@@ -272,7 +278,7 @@ export function ApplicationPage() {
         docType: "docx",
         positions: positions.map((p) => ({
           name: p.name,
-          contracts: p.contracts,
+          contracts: p.contracts.length === 1 ? [] : p.contracts,
           positionPrice: getPositionPrice(p),
           positionCount: getQuantity(p.id),
         })),
@@ -338,7 +344,10 @@ export function ApplicationPage() {
             size="sm"
             onClick={handleDownload}
             disabled={
-              isDownloading || !hasReportablePositions || hasBlockingPositions
+              isDownloading ||
+              !hasReportablePositions ||
+              hasBlockingPositions ||
+              hasEditablePriceWithZeroNmck
             }
           >
             <Download className="mr-2 size-4" />
@@ -393,7 +402,7 @@ export function ApplicationPage() {
                         })
                       }
                       disabled={deletePosition.isPending}
-                      className="text-muted-foreground hover:text-destructive transition-colors p-1 rounded"
+                      className="rounded p-1 text-muted-foreground transition-colors hover:text-destructive"
                       title="Удалить товар"
                     >
                       <Trash2 className="size-3.5" />
@@ -408,6 +417,15 @@ export function ApplicationPage() {
                       Все контракты по этой позиции были заключены с
                       единственным поставщиком. Для обоснования цены необходимо
                       минимум 2 различных поставщика.
+                    </AlertDescription>
+                  </Alert>
+                )}
+                {position.contracts.length <= 1 && (
+                  <Alert>
+                    <TriangleAlert />
+                    <AlertTitle>Недостаточно данных</AlertTitle>
+                    <AlertDescription>
+                      Выберите больше контрактов, либо укажите цену вручную.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -448,22 +466,20 @@ export function ApplicationPage() {
                           <span className="font-medium tabular-nums">
                             {quantity}
                           </span>
-                          {canEditPrice && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="size-7 text-muted-foreground hover:text-foreground"
-                              onClick={() => startEditQuantity(position.id)}
-                              title="Редактировать количество"
-                              aria-label="Редактировать количество"
-                            >
-                              <Pencil className="size-3.5" />
-                            </Button>
-                          )}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-7 text-muted-foreground hover:text-foreground"
+                            onClick={() => startEditQuantity(position.id)}
+                            title="Редактировать количество"
+                            aria-label="Редактировать количество"
+                          >
+                            <Pencil className="size-3.5" />
+                          </Button>
                         </>
                       )}
                     </div>
-                    {position.contracts.length > 0 ? (
+                    {!canEditPrice ? (
                       <div className="flex items-center gap-2">
                         <span className="text-xs text-muted-foreground">
                           Расчётная НМЦК
@@ -566,7 +582,7 @@ export function ApplicationPage() {
                                   })
                                 }
                                 disabled={deleteContract.isPending}
-                                className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive p-1 rounded"
+                                className="rounded p-1 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
                                 title="Удалить контракт"
                               >
                                 <Trash2 className="size-3.5" />
