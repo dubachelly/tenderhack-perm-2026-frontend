@@ -56,7 +56,6 @@ const toNds = (vatRate?: number | string | null) => {
   return s
 }
 
-
 export function buildStePricePayload({
   contractName,
   positions,
@@ -148,7 +147,6 @@ export async function downloadStePriceReport(
   URL.revokeObjectURL(url)
 }
 
-
 export type PositionMeta = {
   quantity?: number
   manualNmck?: number | null
@@ -159,7 +157,10 @@ const POSITION_META_PREFIX = "tenderhack:position-meta"
 const getPositionMetaKey = (appId: number, queryId: number) =>
   `${POSITION_META_PREFIX}:${appId}:${queryId}`
 
-export function loadPositionMeta(appId: number, queryId: number): PositionMeta | null {
+export function loadPositionMeta(
+  appId: number,
+  queryId: number
+): PositionMeta | null {
   try {
     const raw = localStorage.getItem(getPositionMetaKey(appId, queryId))
     if (!raw) return null
@@ -169,7 +170,8 @@ export function loadPositionMeta(appId: number, queryId: number): PositionMeta |
         ? parsed.quantity
         : undefined
     const manualNmck =
-      typeof parsed.manualNmck === "number" && Number.isFinite(parsed.manualNmck)
+      typeof parsed.manualNmck === "number" &&
+      Number.isFinite(parsed.manualNmck)
         ? parsed.manualNmck
         : undefined
     return { ...parsed, quantity, manualNmck }
@@ -186,7 +188,10 @@ export function updatePositionMeta(
   const current = loadPositionMeta(appId, queryId) ?? {}
   const next = { ...current, ...patch }
   try {
-    localStorage.setItem(getPositionMetaKey(appId, queryId), JSON.stringify(next))
+    localStorage.setItem(
+      getPositionMetaKey(appId, queryId),
+      JSON.stringify(next)
+    )
   } catch {
     // ignore storage errors
   }

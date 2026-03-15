@@ -11,6 +11,11 @@ interface SteCardProps {
   onLink: (contractId: number) => void
   onUnlink: (contractId: number) => void
   linkingId: number | null
+  categoryFilter?: string[]
+  supplierRegionFilter?: string[]
+  procurementMethodFilter?: string[]
+  periodFrom?: string | null
+  periodTo?: string | null
 }
 
 export function SteCard({
@@ -19,6 +24,11 @@ export function SteCard({
   onLink,
   onUnlink,
   linkingId,
+  categoryFilter,
+  supplierRegionFilter,
+  procurementMethodFilter,
+  periodFrom,
+  periodTo,
 }: SteCardProps) {
   const [modalOpen, setModalOpen] = useState(false)
 
@@ -88,6 +98,11 @@ export function SteCard({
         onLink={onLink}
         onUnlink={onUnlink}
         linkingId={linkingId}
+        categoryFilter={categoryFilter}
+        supplierRegionFilter={supplierRegionFilter}
+        procurementMethodFilter={procurementMethodFilter}
+        periodFrom={periodFrom}
+        periodTo={periodTo}
       />
     </>
   )

@@ -6,15 +6,16 @@ import {
   useMutation,
   useQueryClient,
 } from "@tanstack/react-query"
-import { SlidersHorizontal, Plus, Search } from "lucide-react"
+import { SlidersHorizontal, Plus, Search, Star } from "lucide-react"
 
 import {
   getApplicationsByIdOptions,
   getApplicationsByIdQueryKey,
   getSearchItemsInfiniteOptions,
+  getSearchCategoriesOptions,
   getContractsSupplierRegionsOptions,
   getContractsProcurementMethodsOptions,
-  getSteCategoriesOptions,
+  getSearchAiItemsOptions,
   postApplicationsByAppIdQueriesByQueryIdContractsMutation,
   deleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdMutation,
   patchApplicationsByAppIdQueriesByQueryIdMutation,
@@ -40,6 +41,9 @@ import { MultiSelect } from "@/components/multi-select"
 import { DateRangePicker, toISODate } from "@/components/date-range-picker"
 import type { DateRange } from "@/components/date-range-picker"
 import { LinkedContractsSheet } from "@/components/linked-contracts-sheet"
+import { SteCard } from "@/components/ste-card"
+import { Skeleton } from "@/components/ui/skeleton"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
 type StoredFilters = {
   categoryFilter?: string[]
@@ -171,10 +175,16 @@ export function QueryPage() {
     dateRange,
   ])
 
-  const { data: categories = [] } = useQuery({
-    ...getSteCategoriesOptions({ query: { query: debouncedSearch } }),
-    enabled: !!debouncedSearch,
-  })
+  const periodFrom = dateRange?.from ? toISODate(dateRange.from) : null
+  const periodTo = dateRange?.to ? toISODate(dateRange.to) : null
+
+  const { data: categories = [] } = useQuery(
+    getSearchCategoriesOptions({
+      query: {
+        ...(debouncedSearch ? { q: debouncedSearch } : {}),
+      },
+    })
+  )
   const linkedContracts = currentQuery?.contracts ?? []
 
   const activeQuery = {
@@ -187,8 +197,8 @@ export function QueryPage() {
     ...(procurementMethodFilter.length > 0
       ? { procurement_method: procurementMethodFilter }
       : {}),
-    ...(dateRange?.from ? { period_from: toISODate(dateRange.from) } : {}),
-    ...(dateRange?.to ? { period_to: toISODate(dateRange.to) } : {}),
+    ...(periodFrom ? { period_from: periodFrom } : {}),
+    ...(periodTo ? { period_to: periodTo } : {}),
   }
 
   const { data, isLoading, isFetchingNextPage, hasNextPage, fetchNextPage } =
@@ -203,6 +213,11 @@ export function QueryPage() {
       },
       enabled: !!debouncedSearch,
     })
+
+  const { data: aiData, isLoading: isAiLoading } = useQuery({
+    ...getSearchAiItemsOptions({ query: { q: debouncedSearch } }),
+    enabled: !!debouncedSearch,
+  })
 
   const patchQueryMutation = useMutation({
     ...patchApplicationsByAppIdQueriesByQueryIdMutation(),
@@ -306,88 +321,150 @@ export function QueryPage() {
           : ""}
       </p>
 
-      <div className="mb-4 rounded-lg border bg-card p-4">
-        <div className="mb-3 flex items-center gap-2">
-          <SlidersHorizontal className="size-4 text-muted-foreground" />
-          <span className="text-sm font-medium">Фильтры</span>
-          {hasActiveFilters && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="ml-auto h-6 text-xs"
-              onClick={resetFilters}
-            >
-              Сбросить
-            </Button>
-          )}
-        </div>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Категория</p>
-            <MultiSelectCombobox
-              items={categories}
-              value={categoryFilter}
-              onValueChange={setCategoryFilter}
-              placeholder="Все категории"
-              emptyText="Нет категорий"
-            />
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Регион поставщика</p>
-            <MultiSelectCombobox
-              items={supplierRegions as string[]}
-              value={supplierRegionFilter}
-              onValueChange={setSupplierRegionFilter}
-              placeholder="Все регионы"
-              emptyText="Нет регионов"
-            />
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Способ закупки</p>
-            <MultiSelect
-              items={procurementMethods as string[]}
-              value={procurementMethodFilter}
-              onValueChange={setProcurementMethodFilter}
-              placeholder="Все способы"
-            />
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Период заключения</p>
-            <DateRangePicker
-              value={dateRange}
-              onChange={setDateRange}
-              placeholder="Любой период"
-            />
-          </div>
-        </div>
-      </div>
-
       <div className="pb-14">
         {debouncedSearch ? (
-          <>
-            {!isLoading &&
-              data &&
-              data.pages[0]?.total !== undefined &&
-              data.pages[0].total > 0 && (
-                <p className="mb-3 text-sm text-muted-foreground">
-                  Найдено СТЕ: {(data.pages[0]?.total as number) ?? 0}
-                </p>
+          <Tabs defaultValue="search">
+            <TabsList className="mb-4">
+              <TabsTrigger value="search">
+                Поиск
+                {!isLoading && data?.pages[0]?.total !== undefined && (
+                  <span className="ml-1.5 text-xs text-muted-foreground">
+                    {data.pages[0].total as number}
+                  </span>
+                )}
+              </TabsTrigger>
+              <TabsTrigger value="ai" className="data-[state=active]:text-purple-600 data-[state=inactive]:text-purple-400">
+                <Star className="mr-1 size-3.5" />
+                AI-подбор
+                {!isAiLoading && aiData?.data && aiData.data.length > 0 && (
+                  <span className="ml-1.5 text-xs">
+                    {aiData.data.length}
+                  </span>
+                )}
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="search">
+              <div className="mb-4 rounded-lg border bg-card p-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <SlidersHorizontal className="size-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Фильтры</span>
+                  {hasActiveFilters && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="ml-auto h-6 text-xs"
+                      onClick={resetFilters}
+                    >
+                      Сбросить
+                    </Button>
+                  )}
+                </div>
+                <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Категория</p>
+                    <MultiSelectCombobox
+                      items={categories}
+                      value={categoryFilter}
+                      onValueChange={setCategoryFilter}
+                      placeholder="Все категории"
+                      emptyText="Нет категорий"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Регион поставщика</p>
+                    <MultiSelectCombobox
+                      items={supplierRegions as string[]}
+                      value={supplierRegionFilter}
+                      onValueChange={setSupplierRegionFilter}
+                      placeholder="Все регионы"
+                      emptyText="Нет регионов"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Способ закупки</p>
+                    <MultiSelect
+                      items={procurementMethods as string[]}
+                      value={procurementMethodFilter}
+                      onValueChange={setProcurementMethodFilter}
+                      placeholder="Все способы"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-xs text-muted-foreground">Период заключения</p>
+                    <DateRangePicker
+                      value={dateRange}
+                      onChange={setDateRange}
+                      placeholder="Любой период"
+                    />
+                  </div>
+                </div>
+              </div>
+              <SteResultsList
+                data={data}
+                isLoading={
+                  isLoading &&
+                  !(
+                    searchInput.trim().length > 0 &&
+                    searchInput.trim().length < 3
+                  )
+                }
+                tooShort={
+                  searchInput.trim().length > 0 && searchInput.trim().length < 3
+                }
+                isFetchingNextPage={isFetchingNextPage}
+                hasNextPage={!!hasNextPage}
+                fetchNextPage={fetchNextPage}
+                queryData={currentQuery}
+                appId={numAppId}
+                queryId={numQueryId}
+                onLink={handleLink}
+                onUnlink={handleUnlink}
+                linkingId={linkingId}
+                categoryFilter={categoryFilter}
+                supplierRegionFilter={supplierRegionFilter}
+                procurementMethodFilter={procurementMethodFilter}
+                periodFrom={periodFrom}
+                periodTo={periodTo}
+              />
+            </TabsContent>
+
+            <TabsContent value="ai">
+              {isAiLoading ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Skeleton key={i} className="h-32 w-full" />
+                  ))}
+                </div>
+              ) : !aiData?.data || aiData.data.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
+                  <p className="text-sm">Ничего не найдено</p>
+                  <p className="mt-1 text-xs">
+                    Попробуйте изменить поисковый запрос
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {aiData.data.map((item) => (
+                    <SteCard
+                      key={item.ste_id}
+                      item={item}
+                      linkedContractIds={
+                        new Set(
+                          currentQuery?.contracts
+                            ?.map((c) => c.contractItemId)
+                            .filter((id): id is number => id !== undefined)
+                        )
+                      }
+                      linkingId={linkingId}
+                      onLink={handleLink}
+                      onUnlink={handleUnlink}
+                    />
+                  ))}
+                </div>
               )}
-            <SteResultsList
-              data={data}
-              isLoading={isLoading && !(searchInput.trim().length > 0 && searchInput.trim().length < 3)}
-              tooShort={searchInput.trim().length > 0 && searchInput.trim().length < 3}
-              isFetchingNextPage={isFetchingNextPage}
-              hasNextPage={!!hasNextPage}
-              fetchNextPage={fetchNextPage}
-              queryData={currentQuery}
-              appId={numAppId}
-              queryId={numQueryId}
-              onLink={handleLink}
-              onUnlink={handleUnlink}
-              linkingId={linkingId}
-            />
-          </>
+            </TabsContent>
+          </Tabs>
         ) : (
           <div className="flex items-center justify-center py-20 text-sm text-muted-foreground">
             Загрузка...
@@ -401,6 +478,7 @@ export function QueryPage() {
         appId={numAppId}
         queryId={numQueryId}
         onRemove={handleUnlink}
+        isPending={linkMutation.isPending || unlinkMutation.isPending}
       />
 
       <Link

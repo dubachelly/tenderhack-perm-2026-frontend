@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react"
 import { Link } from "react-router"
-import { TableOfContentsIcon, Trash2 } from "lucide-react"
+import { TableOfContentsIcon, Trash2, Loader2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -28,6 +28,7 @@ interface LinkedContractsSheetProps {
   appId: number
   queryId: number
   onRemove?: (contractItemId: number) => void
+  isPending?: boolean
 }
 
 function formatCurrency(value?: number | null) {
@@ -60,6 +61,7 @@ export function LinkedContractsSheet({
   appId,
   queryId,
   onRemove,
+  isPending = false,
 }: LinkedContractsSheetProps) {
   const [quantity, setQuantity] = useState(1)
   const [manualNmckInput, setManualNmckInput] = useState("0")
@@ -132,11 +134,19 @@ export function LinkedContractsSheet({
     <Sheet>
       <SheetTrigger className="fixed right-4 bottom-0 left-14 z-40 flex h-14 cursor-pointer items-center gap-3 border-t bg-background px-6 shadow-lg transition-colors hover:bg-accent">
         <div className="absolute top-2 left-1/2 h-1 w-10 -translate-x-1/2 rounded-full bg-muted-foreground/30" />
-        <TableOfContentsIcon className="size-4 text-muted-foreground" />
+        {isPending ? (
+          <Loader2 className="size-4 animate-spin text-muted-foreground" />
+        ) : (
+          <TableOfContentsIcon className="size-4 text-muted-foreground" />
+        )}
         <span className="text-sm font-medium">Отчёт</span>
-        <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
-          {contracts.length}
-        </span>
+        {isPending ? (
+          <span className="text-xs text-muted-foreground">Сохранение...</span>
+        ) : (
+          <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
+            {contracts.length}
+          </span>
+        )}
       </SheetTrigger>
 
       <SheetContent side="bottom" className="flex max-h-[60vh] flex-col">

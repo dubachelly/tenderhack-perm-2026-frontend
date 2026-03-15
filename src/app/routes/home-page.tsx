@@ -1,16 +1,13 @@
 import { useQuery } from "@tanstack/react-query"
-import { useSearchParams, useNavigate } from "react-router"
-import { X } from "lucide-react"
+import { useSearchParams } from "react-router"
 
 import { SearchBar } from "@/components/search-bar"
-import { Button } from "@/components/ui/button"
 import { getApplicationsByIdOptions } from "@/shared/api/autogen/@tanstack/react-query.gen"
 import { useCreateApplicationWithQuery } from "@/hooks/use-create-application-with-query"
 import { useAddQueryToApplication } from "@/hooks/use-add-query-to-application"
 
 export function HomePage() {
   const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
   const appId = searchParams.get("appId")
 
   const { data: app } = useQuery({

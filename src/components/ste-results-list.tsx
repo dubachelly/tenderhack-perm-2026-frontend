@@ -19,6 +19,11 @@ interface SteResultsListProps {
   onUnlink: (contractId: number) => void
   linkingId: number | null
   tooShort?: boolean
+  categoryFilter?: string[]
+  supplierRegionFilter?: string[]
+  procurementMethodFilter?: string[]
+  periodFrom?: string | null
+  periodTo?: string | null
 }
 
 export function SteResultsList({
@@ -32,6 +37,11 @@ export function SteResultsList({
   onUnlink,
   linkingId,
   tooShort,
+  categoryFilter,
+  supplierRegionFilter,
+  procurementMethodFilter,
+  periodFrom,
+  periodTo,
 }: SteResultsListProps) {
   const linkedContractIds = new Set(queryData?.contracts?.map((c) => c.contractItemId).filter((id): id is number => id !== undefined))
 
@@ -80,6 +90,11 @@ export function SteResultsList({
           linkingId={linkingId}
           onLink={onLink}
           onUnlink={onUnlink}
+          categoryFilter={categoryFilter}
+          supplierRegionFilter={supplierRegionFilter}
+          procurementMethodFilter={procurementMethodFilter}
+          periodFrom={periodFrom}
+          periodTo={periodTo}
         />
       ))}
       <div ref={sentinelRef} className="h-1" />

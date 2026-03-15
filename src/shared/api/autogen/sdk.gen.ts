@@ -2,7 +2,7 @@
 
 import type { Client, Options as Options2, TDataShape } from './client';
 import { client } from './client.gen';
-import type { DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdData, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdErrors, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdResponses, DeleteApplicationsByAppIdQueriesByQueryIdData, DeleteApplicationsByAppIdQueriesByQueryIdErrors, DeleteApplicationsByAppIdQueriesByQueryIdResponses, DeleteApplicationsByIdData, DeleteApplicationsByIdErrors, DeleteApplicationsByIdResponses, GetApplicationsByIdData, GetApplicationsByIdErrors, GetApplicationsByIdResponses, GetApplicationsData, GetApplicationsErrors, GetApplicationsResponses, GetContractsBuyerRegionsData, GetContractsBuyerRegionsErrors, GetContractsBuyerRegionsResponses, GetContractsByIdData, GetContractsByIdErrors, GetContractsByIdItemsData, GetContractsByIdItemsErrors, GetContractsByIdItemsResponses, GetContractsByIdResponses, GetContractsData, GetContractsErrors, GetContractsProcurementMethodsData, GetContractsProcurementMethodsErrors, GetContractsProcurementMethodsResponses, GetContractsResponses, GetContractsSupplierRegionsData, GetContractsSupplierRegionsErrors, GetContractsSupplierRegionsResponses, GetHealthData, GetHealthResponses, GetSearchItemsData, GetSearchItemsErrors, GetSearchItemsResponses, GetSearchSteBySteIdContractsData, GetSearchSteBySteIdContractsErrors, GetSearchSteBySteIdContractsResponses, GetSteByIdData, GetSteByIdErrors, GetSteByIdResponses, GetSteCategoriesData, GetSteCategoriesErrors, GetSteCategoriesResponses, GetSteData, GetSteErrors, GetSteResponses, PatchApplicationsByAppIdQueriesByQueryIdData, PatchApplicationsByAppIdQueriesByQueryIdErrors, PatchApplicationsByAppIdQueriesByQueryIdResponses, PostApplicationsByAppIdQueriesByQueryIdContractsData, PostApplicationsByAppIdQueriesByQueryIdContractsErrors, PostApplicationsByAppIdQueriesByQueryIdContractsResponses, PostApplicationsByIdQueriesData, PostApplicationsByIdQueriesErrors, PostApplicationsByIdQueriesResponses, PostApplicationsData, PostApplicationsErrors, PostApplicationsResponses } from './types.gen';
+import type { DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdData, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdErrors, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdResponses, DeleteApplicationsByAppIdQueriesByQueryIdData, DeleteApplicationsByAppIdQueriesByQueryIdErrors, DeleteApplicationsByAppIdQueriesByQueryIdResponses, DeleteApplicationsByIdData, DeleteApplicationsByIdErrors, DeleteApplicationsByIdResponses, GetApplicationsByIdData, GetApplicationsByIdErrors, GetApplicationsByIdResponses, GetApplicationsData, GetApplicationsErrors, GetApplicationsResponses, GetContractsBuyerRegionsData, GetContractsBuyerRegionsErrors, GetContractsBuyerRegionsResponses, GetContractsByIdData, GetContractsByIdErrors, GetContractsByIdItemsData, GetContractsByIdItemsErrors, GetContractsByIdItemsResponses, GetContractsByIdResponses, GetContractsData, GetContractsErrors, GetContractsProcurementMethodsData, GetContractsProcurementMethodsErrors, GetContractsProcurementMethodsResponses, GetContractsResponses, GetContractsSupplierRegionsData, GetContractsSupplierRegionsErrors, GetContractsSupplierRegionsResponses, GetHealthData, GetHealthResponses, GetSearchAiItemsData, GetSearchAiItemsErrors, GetSearchAiItemsResponses, GetSearchCategoriesData, GetSearchCategoriesErrors, GetSearchCategoriesResponses, GetSearchItemsData, GetSearchItemsErrors, GetSearchItemsResponses, GetSearchSteBySteIdContractsData, GetSearchSteBySteIdContractsErrors, GetSearchSteBySteIdContractsResponses, GetSteByIdData, GetSteByIdErrors, GetSteByIdResponses, GetSteCategoriesData, GetSteCategoriesErrors, GetSteCategoriesResponses, GetSteData, GetSteErrors, GetSteResponses, PatchApplicationsByAppIdQueriesByQueryIdData, PatchApplicationsByAppIdQueriesByQueryIdErrors, PatchApplicationsByAppIdQueriesByQueryIdResponses, PatchApplicationsByIdData, PatchApplicationsByIdErrors, PatchApplicationsByIdResponses, PostApplicationsByAppIdQueriesByQueryIdContractsData, PostApplicationsByAppIdQueriesByQueryIdContractsErrors, PostApplicationsByAppIdQueriesByQueryIdContractsResponses, PostApplicationsByIdQueriesData, PostApplicationsByIdQueriesErrors, PostApplicationsByIdQueriesResponses, PostApplicationsData, PostApplicationsErrors, PostApplicationsResponses } from './types.gen';
 
 export type Options<TData extends TDataShape = TDataShape, ThrowOnError extends boolean = boolean> = Options2<TData, ThrowOnError> & {
     /**
@@ -96,6 +96,18 @@ export const deleteApplicationsById = <ThrowOnError extends boolean = false>(opt
 export const getApplicationsById = <ThrowOnError extends boolean = false>(options: Options<GetApplicationsByIdData, ThrowOnError>) => (options.client ?? client).get<GetApplicationsByIdResponses, GetApplicationsByIdErrors, ThrowOnError>({ url: '/applications/{id}', ...options });
 
 /**
+ * Изменить название заявки
+ */
+export const patchApplicationsById = <ThrowOnError extends boolean = false>(options: Options<PatchApplicationsByIdData, ThrowOnError>) => (options.client ?? client).patch<PatchApplicationsByIdResponses, PatchApplicationsByIdErrors, ThrowOnError>({
+    url: '/applications/{id}',
+    ...options,
+    headers: {
+        'Content-Type': 'application/json',
+        ...options.headers
+    }
+});
+
+/**
  * Добавить запрос в заявку
  */
 export const postApplicationsByIdQueries = <ThrowOnError extends boolean = false>(options: Options<PostApplicationsByIdQueriesData, ThrowOnError>) => (options.client ?? client).post<PostApplicationsByIdQueriesResponses, PostApplicationsByIdQueriesErrors, ThrowOnError>({
@@ -142,7 +154,19 @@ export const postApplicationsByAppIdQueriesByQueryIdContracts = <ThrowOnError ex
 export const deleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemId = <ThrowOnError extends boolean = false>(options: Options<DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdData, ThrowOnError>) => (options.client ?? client).delete<DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdResponses, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdErrors, ThrowOnError>({ url: '/applications/{appId}/queries/{queryId}/contracts/{contractItemId}', ...options });
 
 /**
- * Полнотекстовый поиск СТЕ (включая без контрактов)
+ * AI-поиск СТЕ по точному совпадению названия
+ *
+ * Запрашивает AI-сервис (localhost:8000/search), затем возвращает СТЕ из БД с точно совпадающим названием. Формат ответа идентичен /search/items.
+ */
+export const getSearchAiItems = <ThrowOnError extends boolean = false>(options: Options<GetSearchAiItemsData, ThrowOnError>) => (options.client ?? client).get<GetSearchAiItemsResponses, GetSearchAiItemsErrors, ThrowOnError>({ url: '/search/ai-items', ...options });
+
+/**
+ * Список категорий СТЕ по поисковому запросу
+ */
+export const getSearchCategories = <ThrowOnError extends boolean = false>(options?: Options<GetSearchCategoriesData, ThrowOnError>) => (options?.client ?? client).get<GetSearchCategoriesResponses, GetSearchCategoriesErrors, ThrowOnError>({ url: '/search/categories', ...options });
+
+/**
+ * Полнотекстовый поиск СТЕ
  */
 export const getSearchItems = <ThrowOnError extends boolean = false>(options: Options<GetSearchItemsData, ThrowOnError>) => (options.client ?? client).get<GetSearchItemsResponses, GetSearchItemsErrors, ThrowOnError>({ url: '/search/items', ...options });
 

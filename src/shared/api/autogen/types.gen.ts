@@ -111,6 +111,10 @@ export type SearchSteGroup = {
      */
     rank?: number;
     /**
+     * Число позиций контрактов в пределах IQR (рекомендованные цены) с учётом фильтров
+     */
+    suggested_items_count?: number;
+    /**
      * Массив id позиций контрактов (contract_items), содержащих данную СТЕ
      */
     contract_item_ids?: Array<number>;
@@ -604,6 +608,43 @@ export type GetApplicationsByIdResponses = {
 
 export type GetApplicationsByIdResponse = GetApplicationsByIdResponses[keyof GetApplicationsByIdResponses];
 
+export type PatchApplicationsByIdData = {
+    body: {
+        name: string;
+    };
+    path: {
+        id: number;
+    };
+    query?: never;
+    url: '/applications/{id}';
+};
+
+export type PatchApplicationsByIdErrors = {
+    /**
+     * Error
+     */
+    400: Error;
+    /**
+     * Error
+     */
+    404: Error;
+    /**
+     * Error
+     */
+    500: Error;
+};
+
+export type PatchApplicationsByIdError = PatchApplicationsByIdErrors[keyof PatchApplicationsByIdErrors];
+
+export type PatchApplicationsByIdResponses = {
+    /**
+     * Обновлённая заявка
+     */
+    200: Application;
+};
+
+export type PatchApplicationsByIdResponse = PatchApplicationsByIdResponses[keyof PatchApplicationsByIdResponses];
+
 export type PostApplicationsByIdQueriesData = {
     body: {
         queryText: string;
@@ -794,6 +835,79 @@ export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdRe
 
 export type DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdResponse = DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdResponses[keyof DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdResponses];
 
+export type GetSearchAiItemsData = {
+    body?: never;
+    path?: never;
+    query: {
+        /**
+         * Поисковый запрос, передаётся в AI-сервис
+         */
+        q: string;
+    };
+    url: '/search/ai-items';
+};
+
+export type GetSearchAiItemsErrors = {
+    /**
+     * Error
+     */
+    400: Error;
+    /**
+     * Error
+     */
+    500: Error;
+    /**
+     * Error
+     */
+    502: Error;
+};
+
+export type GetSearchAiItemsError = GetSearchAiItemsErrors[keyof GetSearchAiItemsErrors];
+
+export type GetSearchAiItemsResponses = {
+    /**
+     * OK
+     */
+    200: {
+        data?: Array<SearchSteGroup>;
+        total?: number;
+        page?: number;
+        limit?: number;
+    };
+};
+
+export type GetSearchAiItemsResponse = GetSearchAiItemsResponses[keyof GetSearchAiItemsResponses];
+
+export type GetSearchCategoriesData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Поисковый запрос — возвращаются только категории среди подходящих СТЕ
+         */
+        q?: string;
+    };
+    url: '/search/categories';
+};
+
+export type GetSearchCategoriesErrors = {
+    /**
+     * Error
+     */
+    500: Error;
+};
+
+export type GetSearchCategoriesError = GetSearchCategoriesErrors[keyof GetSearchCategoriesErrors];
+
+export type GetSearchCategoriesResponses = {
+    /**
+     * OK
+     */
+    200: Array<string>;
+};
+
+export type GetSearchCategoriesResponse = GetSearchCategoriesResponses[keyof GetSearchCategoriesResponses];
+
 export type GetSearchItemsData = {
     body?: never;
     path?: never;
@@ -805,23 +919,23 @@ export type GetSearchItemsData = {
          */
         q: string;
         /**
-         * Фильтр по категории продукции (можно несколько: ?category=A&category=B)
+         * Фильтр по категории СТЕ — ограничивает выдачу (можно несколько: ?category=A&category=B)
          */
         category?: Array<string>;
         /**
-         * Фильтр по региону поставщика (можно несколько)
+         * Фильтр по региону поставщика — влияет на расчёт suggested_items_count (можно несколько)
          */
         supplier_region?: Array<string>;
         /**
-         * Начало периода подписания контракта (YYYY-MM-DD)
+         * Начало периода подписания контракта (YYYY-MM-DD) — влияет на расчёт suggested_items_count
          */
         period_from?: string;
         /**
-         * Конец периода подписания контракта (YYYY-MM-DD)
+         * Конец периода подписания контракта (YYYY-MM-DD) — влияет на расчёт suggested_items_count
          */
         period_to?: string;
         /**
-         * Фильтр по способу закупки (можно несколько)
+         * Фильтр по способу закупки — влияет на расчёт suggested_items_count (можно несколько)
          */
         procurement_method?: Array<string>;
     };
@@ -850,10 +964,6 @@ export type GetSearchItemsResponses = {
         total?: number;
         page?: number;
         limit?: number;
-        /**
-         * Уникальные категории из текущей страницы результатов
-         */
-        categories?: Array<string>;
     };
 };
 
@@ -907,7 +1017,14 @@ export type GetSearchSteBySteIdContractsResponses = {
      * Контракты с позициями для данной СТЕ
      */
     200: {
+        /**
+         * Все позиции контрактов, удовлетворяющие фильтрам
+         */
         data?: Array<SteContractRow>;
+        /**
+         * Позиции, попадающие в доверительный диапазон цены по IQR (Q1 - 1.5·IQR ≤ unit_price ≤ Q3 + 1.5·IQR)
+         */
+        suggestedItems?: Array<SteContractRow>;
     };
 };
 
