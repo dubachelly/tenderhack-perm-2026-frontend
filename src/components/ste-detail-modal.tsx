@@ -270,7 +270,16 @@ export function SteDetailModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="flex max-h-[90vh] flex-col gap-0 overflow-hidden p-0 sm:max-w-[92vw]">
         <DialogHeader className="border-b p-6 pb-4">
-          <DialogTitle className="pr-6 text-base leading-snug font-semibold">
+          <DialogTitle
+            className="pr-6 text-base leading-snug font-semibold break-words"
+            title={item.ste_name ?? "—"}
+            style={{
+              display: "-webkit-box",
+              WebkitLineClamp: 3,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+            }}
+          >
             {item.ste_name ?? "—"}
           </DialogTitle>
           <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">

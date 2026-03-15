@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   PanelLeftClose,
   PanelLeftOpen,
-  Plus,
+  Check,
   ChevronDown,
   ChevronRight,
   FolderOpen,
+  Pencil,
+  Plus,
   Trash2,
+  X,
 } from "lucide-react";
 
 import {
@@ -19,6 +22,8 @@ import {
   deleteApplicationsByIdMutation,
   deleteApplicationsByAppIdQueriesByQueryIdMutation,
 } from "@/shared/api/autogen/@tanstack/react-query.gen";
+import { Input } from "@/components/ui/input";
+import { useUpdateApplicationName } from "@/hooks/use-update-application-name";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useSidebar } from "./sidebar-context";
@@ -36,6 +41,8 @@ function ApplicationItem({
 }) {
   const isActive = String(id) === activeAppId;
   const [open, setOpen] = useState(isActive);
+  const [isEditing, setIsEditing] = useState(false);
+  const [draftName, setDraftName] = useState(appName ?? "");
   const navigate = useNavigate();
   const { isCollapsed } = useSidebar();
   const queryClient = useQueryClient();
@@ -64,6 +71,46 @@ function ApplicationItem({
     },
   });
 
+  const updateName = useUpdateApplicationName();
+
+  useEffect(() => {
+    setDraftName(appName ?? "");
+  }, [appName]);
+
+  const startEdit = (e: MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsEditing(true);
+  };
+
+  const cancelEdit = (e?: MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    setDraftName(appName ?? "");
+    setIsEditing(false);
+  };
+
+  const saveEdit = (e?: MouseEvent) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    const next = draftName.trim();
+    if (!next) return;
+    if (next === appName) {
+      setIsEditing(false);
+      return;
+    }
+    updateName.mutate(
+      { id, name: next },
+      {
+        onSuccess: () => setIsEditing(false),
+      }
+    );
+  };
+
   const handleAddPosition = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -91,7 +138,7 @@ function ApplicationItem({
           isActive ? "bg-primary/10 text-primary" : "hover:bg-muted"
         )}
         title={appName}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => !isEditing && setOpen((o) => !o)}
       >
         <FolderOpen className="size-4 shrink-0" />
       </div>
@@ -105,7 +152,7 @@ function ApplicationItem({
           "flex items-center gap-1 px-2 py-1.5 cursor-pointer rounded-sm transition-colors group",
           isActive ? "bg-primary/10 text-primary" : "hover:bg-muted"
         )}
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => !isEditing && setOpen((o) => !o)}
       >
         <span className="shrink-0 text-muted-foreground">
           {open ? (
@@ -114,22 +161,72 @@ function ApplicationItem({
             <ChevronRight className="size-3" />
           )}
         </span>
+        {isEditing ? (
+        <Input
+          value={draftName}
+          onChange={(e) => setDraftName(e.target.value)}
+          onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              saveEdit();
+            }
+            if (e.key === "Escape") {
+              e.preventDefault();
+              cancelEdit();
+            }
+          }}
+          className="h-6 text-xs"
+          autoFocus
+        />
+      ) : (
         <span className="flex-1 truncate text-xs font-medium">{appName}</span>
-        <button
-          onClick={handleAddPosition}
-          className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
-          title="Добавить позицию"
-        >
-          <Plus className="size-3" />
-        </button>
-        <button
-          onClick={handleDeleteApp}
-          className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-          title="Удалить заявку"
-          disabled={deleteApp.isPending}
-        >
-          <Trash2 className="size-3" />
-        </button>
+      )}
+        {isEditing ? (
+          <>
+            <button
+              onClick={saveEdit}
+              className="shrink-0 text-muted-foreground hover:text-foreground"
+              title="Сохранить"
+              disabled={updateName.isPending}
+            >
+              <Check className="size-3" />
+            </button>
+            <button
+              onClick={cancelEdit}
+              className="shrink-0 text-muted-foreground hover:text-foreground"
+              title="Отменить"
+              disabled={updateName.isPending}
+            >
+              <X className="size-3" />
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={startEdit}
+              className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+              title="Редактировать"
+            >
+              <Pencil className="size-3" />
+            </button>
+            <button
+              onClick={handleAddPosition}
+              className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-foreground"
+              title="Добавить позицию"
+            >
+              <Plus className="size-3" />
+            </button>
+            <button
+              onClick={handleDeleteApp}
+              className="shrink-0 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+              title="Удалить заявку"
+              disabled={deleteApp.isPending}
+            >
+              <Trash2 className="size-3" />
+            </button>
+          </>
+        )}
       </div>
       {open && (
         <div className="ml-4 border-l border-border pl-2 mt-0.5 space-y-0.5">

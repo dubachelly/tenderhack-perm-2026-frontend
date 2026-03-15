@@ -1,7 +1,16 @@
-import { useState } from "react";
+import { useEffect, useState, type MouseEvent } from "react";
 import { Link, useNavigate } from "react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ChevronDown, ChevronRight, Plus, Trash2 } from "lucide-react";
+import {
+  Check,
+  ChevronDown,
+  ChevronRight,
+  FileText,
+  Pencil,
+  Plus,
+  Trash2,
+  X,
+} from "lucide-react";
 
 import {
   getApplicationsOptions,
@@ -12,9 +21,13 @@ import {
   deleteApplicationsByAppIdQueriesByQueryIdMutation,
 } from "@/shared/api/autogen/@tanstack/react-query.gen";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Input } from "@/components/ui/input";
+import { useUpdateApplicationName } from "@/hooks/use-update-application-name";
 
 function ApplicationRow({ appId: id, appName }: { appId: number; appName: string | undefined }) {
   const [open, setOpen] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [draftName, setDraftName] = useState(appName ?? "");
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -41,37 +54,130 @@ function ApplicationRow({ appId: id, appName }: { appId: number; appName: string
     },
   });
 
+  const updateName = useUpdateApplicationName();
+
+  useEffect(() => {
+    setDraftName(appName ?? "");
+  }, [appName]);
+
+  const startEdit = (e: MouseEvent) => {
+    e.stopPropagation();
+    setIsEditing(true);
+  };
+
+  const cancelEdit = (e?: MouseEvent) => {
+    if (e) e.stopPropagation();
+    setDraftName(appName ?? "");
+    setIsEditing(false);
+  };
+
+  const saveEdit = (e?: MouseEvent) => {
+    if (e) e.stopPropagation();
+    const next = draftName.trim();
+    if (!next) return;
+    if (next === appName) {
+      setIsEditing(false);
+      return;
+    }
+    updateName.mutate(
+      { id, name: next },
+      {
+        onSuccess: () => setIsEditing(false),
+      }
+    );
+  };
+
   return (
     <div className="rounded-lg border border-border bg-card">
       <div
         className="flex items-center gap-2 px-4 py-3 cursor-pointer hover:bg-muted/50 transition-colors rounded-lg"
-        onClick={() => setOpen((o) => !o)}
+        onClick={() => !isEditing && setOpen((o) => !o)}
       >
         <span className="text-muted-foreground shrink-0">
           {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
         </span>
-        <span className="flex-1 font-medium text-sm truncate">{appName}</span>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/?appId=${id}`);
-          }}
-          className="shrink-0 text-muted-foreground hover:text-foreground transition-colors p-1 rounded"
-          title="Добавить позицию"
-        >
-          <Plus className="size-4" />
-        </button>
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            deleteApp.mutate({ path: { id } });
-          }}
-          className="shrink-0 text-muted-foreground hover:text-destructive transition-colors p-1 rounded"
-          title="Удалить заявку"
-          disabled={deleteApp.isPending}
-        >
-          <Trash2 className="size-4" />
-        </button>
+        {isEditing ? (
+          <Input
+            value={draftName}
+            onChange={(e) => setDraftName(e.target.value)}
+            onClick={(e) => e.stopPropagation()}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                saveEdit();
+              }
+              if (e.key === "Escape") {
+                e.preventDefault();
+                cancelEdit();
+              }
+            }}
+            className="h-7 text-sm"
+            autoFocus
+          />
+        ) : (
+          <span className="flex-1 font-medium text-sm truncate">{appName}</span>
+        )}
+        {isEditing ? (
+          <>
+            <button
+              onClick={saveEdit}
+              className="shrink-0 text-muted-foreground hover:text-foreground transition-colors p-1 rounded"
+              title="Сохранить"
+              disabled={updateName.isPending}
+            >
+              <Check className="size-4" />
+            </button>
+            <button
+              onClick={cancelEdit}
+              className="shrink-0 text-muted-foreground hover:text-foreground transition-colors p-1 rounded"
+              title="Отменить"
+              disabled={updateName.isPending}
+            >
+              <X className="size-4" />
+            </button>
+          </>
+        ) : (
+          <>
+            <button
+              onClick={startEdit}
+              className="shrink-0 text-muted-foreground hover:text-foreground transition-colors p-1 rounded"
+              title="Редактировать"
+            >
+              <Pencil className="size-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/applications/${id}`);
+              }}
+              className="shrink-0 text-muted-foreground hover:text-foreground transition-colors p-1 rounded"
+              title="Просмотр заявки"
+            >
+              <FileText className="size-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/?appId=${id}`);
+              }}
+              className="shrink-0 text-muted-foreground hover:text-foreground transition-colors p-1 rounded"
+              title="Добавить позицию"
+            >
+              <Plus className="size-4" />
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteApp.mutate({ path: { id } });
+              }}
+              className="shrink-0 text-muted-foreground hover:text-destructive transition-colors p-1 rounded"
+              title="Удалить заявку"
+              disabled={deleteApp.isPending}
+            >
+              <Trash2 className="size-4" />
+            </button>
+          </>
+        )}
       </div>
 
       {open && (

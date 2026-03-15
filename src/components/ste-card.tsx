@@ -40,7 +40,19 @@ export function SteCard({
         onClick={() => setModalOpen(true)}
       >
         <CardHeader>
-          <CardTitle>{item.ste_name ?? "—"}</CardTitle>
+          <CardTitle
+            className="break-words"
+            title={item.ste_name ?? "—"}
+            style={{
+              display: "-webkit-box",
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: "vertical",
+              overflow: "hidden",
+              overflowWrap: "anywhere",
+            }}
+          >
+            {item.ste_name ?? "—"}
+          </CardTitle>
           <div className="flex flex-wrap items-center gap-2">
             {item.ste_category && (
               <Badge variant="secondary">{item.ste_category}</Badge>

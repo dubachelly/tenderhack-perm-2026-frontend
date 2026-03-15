@@ -1,5 +1,6 @@
-import { useState } from "react"
-import { Download, TableOfContentsIcon, Trash2 } from "lucide-react"
+import { useEffect, useRef, useState } from "react"
+import { Link } from "react-router"
+import { TableOfContentsIcon, Trash2 } from "lucide-react"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -19,11 +20,13 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import type { ApplicationQueryContractWithContract } from "@/shared/api/autogen/types.gen"
+import { loadPositionMeta, updatePositionMeta } from "@/shared/report/ste-price"
 
 interface LinkedContractsSheetProps {
   contracts: ApplicationQueryContractWithContract[]
   appName?: string
-  queryText?: string
+  appId: number
+  queryId: number
   onRemove?: (contractItemId: number) => void
 }
 
@@ -51,77 +54,78 @@ function formatDate(value?: string | null) {
   return new Date(value).toLocaleDateString("ru-RU")
 }
 
-async function downloadReport(
-  contracts: ApplicationQueryContractWithContract[],
-  appName: string,
-  queryText: string
-) {
-  const summaryPrice = contracts.reduce((sum, c) => sum + (c.unitPrice ?? 0), 0)
-
-  const body = {
-    contractName: appName,
-    summaryPrice,
-    position: {
-      positionName: queryText,
-      positionPrice: summaryPrice,
-      items: contracts.map((c) => ({
-        contractId: String(c.contractId ?? ""),
-        procurementMethod: c.procurementMethod ?? "",
-        initialContractValue: String(c.initialContractValue ?? "0"),
-        contractValueAfterSigning: String(c.contractValueAfterSigning ?? "0"),
-        reductionPercent: String(c.reductionPercent ?? "0"),
-        contractSigningDate: c.contractSigningDate ?? "",
-        buyerInn: c.buyerInn ?? "",
-        supplierInn: c.supplierInn ?? "",
-        steId: c.steId ?? 0,
-        steItemName: c.steItemName ?? "",
-        unitPrice: String(c.unitPrice ?? "0"),
-      })),
-    },
-  }
-
-  const response = await fetch(
-    "http://localhost:8000/api/v1/ste-price-justification/doc",
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body),
-    }
-  )
-
-  if (!response.ok) {
-    throw new Error(`Ошибка при скачивании: ${response.status}`)
-  }
-
-  const blob = await response.blob()
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement("a")
-  a.href = url
-  a.download = "price-justification.docx"
-  a.click()
-  URL.revokeObjectURL(url)
-}
-
 export function LinkedContractsSheet({
   contracts,
   appName = "",
-  queryText = "",
+  appId,
+  queryId,
   onRemove,
 }: LinkedContractsSheetProps) {
-  const [isDownloading, setIsDownloading] = useState(false)
   const [quantity, setQuantity] = useState(1)
+  const [manualNmckInput, setManualNmckInput] = useState("0")
+  const hydratedKeyRef = useRef<string | null>(null)
+
+  const storageKey =
+    Number.isFinite(appId) && Number.isFinite(queryId)
+      ? `${appId}:${queryId}`
+      : null
+
+  useEffect(() => {
+    if (!storageKey) return
+    const meta = loadPositionMeta(appId, queryId)
+    const storedQuantity =
+      typeof meta?.quantity === "number" && Number.isFinite(meta.quantity)
+        ? meta.quantity
+        : 1
+    const storedManualNmck =
+      typeof meta?.manualNmck === "number" && Number.isFinite(meta.manualNmck)
+        ? meta.manualNmck
+        : 0
+    setQuantity(Math.max(1, storedQuantity))
+    setManualNmckInput(String(storedManualNmck))
+    hydratedKeyRef.current = storageKey
+  }, [appId, queryId, storageKey])
+
+  useEffect(() => {
+    if (!storageKey || hydratedKeyRef.current !== storageKey) return
+    updatePositionMeta(appId, queryId, { quantity })
+  }, [appId, queryId, quantity, storageKey])
 
   const unitPrices = contracts.map((c) => c.unitPrice ?? 0).filter((p) => p > 0)
   const median = calcMedian(unitPrices)
-  const nmck = quantity * median
+  const hasContracts = contracts.length > 0
+  const parsedManual = Number(manualNmckInput)
+  const manualNmck =
+    Number.isFinite(parsedManual) && parsedManual >= 0 ? parsedManual : 0
+  const nmck = hasContracts ? quantity * median : manualNmck
 
-  const handleDownload = async () => {
-    setIsDownloading(true)
-    try {
-      await downloadReport(contracts, appName, queryText)
-    } finally {
-      setIsDownloading(false)
+  const handleManualNmckChange = (value: string) => {
+    setManualNmckInput(value)
+    const parsed = Number(value)
+    if (!Number.isFinite(parsed) || parsed < 0) return
+    updatePositionMeta(appId, queryId, { manualNmck: parsed })
+  }
+
+  const handleManualNmckBlur = () => {
+    const parsed = Number(manualNmckInput)
+    const normalized =
+      Number.isFinite(parsed) && parsed >= 0 ? parsed : 0
+    if (String(normalized) !== manualNmckInput) {
+      setManualNmckInput(String(normalized))
     }
+    updatePositionMeta(appId, queryId, { manualNmck: normalized })
+  }
+
+  const handleClearAll = () => {
+    if (!onRemove) return
+    const shouldClear = window.confirm(
+      "Очистить все выбранные элементы из отчёта?"
+    )
+    if (!shouldClear) return
+    const ids = contracts
+      .map((c) => c.contractItemId)
+      .filter((id): id is number => typeof id === "number")
+    ids.forEach((id) => onRemove(id))
   }
 
   return (
@@ -140,31 +144,68 @@ export function LinkedContractsSheet({
           <SheetTitle className="flex items-center gap-2">
             <TableOfContentsIcon className="size-4 text-muted-foreground" />
             Отчёт
-            {contracts.length > 0 && (
+            {Number.isFinite(appId) && appName && (
+              <Link
+                to={`/applications/${appId}`}
+                className="text-xs text-muted-foreground hover:text-foreground underline underline-offset-2"
+              >
+                {appName}
+              </Link>
+            )}
+            {hasContracts && (
               <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-semibold text-primary-foreground">
                 {contracts.length}
               </span>
             )}
-            {contracts.length > 0 && (
-              <div className="mr-8 ml-auto flex items-center gap-2">
-                <Label
-                  htmlFor="quantity"
-                  className="text-sm font-normal text-muted-foreground"
+            <div className="mr-4 ml-auto flex flex-wrap items-center gap-2">
+              <Label
+                htmlFor="quantity"
+                className="text-sm font-normal text-muted-foreground"
+              >
+                Количество:
+              </Label>
+              <Input
+                id="quantity"
+                type="number"
+                min={1}
+                value={quantity}
+                onChange={(e) =>
+                  setQuantity(Math.max(1, Number(e.target.value) || 1))
+                }
+                className="h-8 w-24"
+              />
+              {!hasContracts && (
+                <>
+                  <Label
+                    htmlFor="manual-nmck"
+                    className="text-sm font-normal text-muted-foreground"
+                  >
+                    Расчётная НМЦК:
+                  </Label>
+                  <Input
+                    id="manual-nmck"
+                    type="number"
+                    min={0}
+                    step="0.01"
+                    value={manualNmckInput}
+                    onChange={(e) => handleManualNmckChange(e.target.value)}
+                    onBlur={handleManualNmckBlur}
+                    className="h-8 w-32"
+                  />
+                </>
+              )}
+              {hasContracts && onRemove && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-xs"
+                  onClick={handleClearAll}
                 >
-                  Количество:
-                </Label>
-                <Input
-                  id="quantity"
-                  type="number"
-                  min={1}
-                  value={quantity}
-                  onChange={(e) =>
-                    setQuantity(Math.max(1, Number(e.target.value) || 1))
-                  }
-                  className="h-8 w-24"
-                />
-              </div>
-            )}
+                  <Trash2 className="mr-1 size-3.5" />
+                  Очистить
+                </Button>
+              )}
+            </div>
           </SheetTitle>
         </SheetHeader>
 
@@ -214,13 +255,11 @@ export function LinkedContractsSheet({
           )}
         </div>
 
-        {contracts.length > 0 && (
-          <div className="flex items-center justify-end border-t px-6 py-3">
-            <span className="text-2xl font-bold tabular-nums">
-              Расчётная НМЦК: {formatCurrency(nmck)}
-            </span>
-          </div>
-        )}
+        <div className="flex items-center justify-end border-t px-6 py-3">
+          <span className="text-2xl font-bold tabular-nums">
+            Расчётная НМЦК: {formatCurrency(nmck)}
+          </span>
+        </div>
       </SheetContent>
     </Sheet>
   )

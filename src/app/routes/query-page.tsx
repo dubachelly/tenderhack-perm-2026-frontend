@@ -41,6 +41,22 @@ import { DateRangePicker, toISODate } from "@/components/date-range-picker"
 import type { DateRange } from "@/components/date-range-picker"
 import { LinkedContractsSheet } from "@/components/linked-contracts-sheet"
 
+type StoredFilters = {
+  categoryFilter?: string[]
+  supplierRegionFilter?: string[]
+  procurementMethodFilter?: string[]
+  dateRange?: { from?: string | null; to?: string | null } | null
+}
+
+const FILTER_STORAGE_PREFIX = "tenderhack:query-filters"
+
+const parseStoredDate = (value?: string | null) => {
+  if (!value) return undefined
+  const [y, m, d] = value.split("-").map(Number)
+  if (!y || !m || !d) return undefined
+  return new Date(y, m - 1, d)
+}
+
 export function QueryPage() {
   const { appId, queryId } = useParams<{ appId: string; queryId: string }>()
   const scrollRef = useRef<HTMLElement | null>(null)
@@ -55,6 +71,7 @@ export function QueryPage() {
     string[]
   >([])
   const [dateRange, setDateRange] = useState<DateRange | undefined>()
+  const [filtersHydrated, setFiltersHydrated] = useState(false)
 
   useEffect(() => {
     scrollRef.current = document.querySelector("main")
@@ -90,6 +107,66 @@ export function QueryPage() {
     }, 400)
     return () => clearTimeout(timer)
   }, [searchInput])
+
+  const storageKey = debouncedSearch
+    ? `${FILTER_STORAGE_PREFIX}:${numAppId}:${numQueryId}:${debouncedSearch}`
+    : null
+
+  useEffect(() => {
+    if (!storageKey) {
+      setFiltersHydrated(false)
+      return
+    }
+
+    setFiltersHydrated(false)
+    const raw = localStorage.getItem(storageKey)
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as StoredFilters
+        setCategoryFilter(parsed.categoryFilter ?? [])
+        setSupplierRegionFilter(parsed.supplierRegionFilter ?? [])
+        setProcurementMethodFilter(parsed.procurementMethodFilter ?? [])
+        const from = parseStoredDate(parsed.dateRange?.from ?? null)
+        const to = parseStoredDate(parsed.dateRange?.to ?? null)
+        setDateRange(from || to ? { from, to } : undefined)
+      } catch {
+        setCategoryFilter([])
+        setSupplierRegionFilter([])
+        setProcurementMethodFilter([])
+        setDateRange(undefined)
+      }
+    } else {
+      setCategoryFilter([])
+      setSupplierRegionFilter([])
+      setProcurementMethodFilter([])
+      setDateRange(undefined)
+    }
+    setFiltersHydrated(true)
+  }, [storageKey])
+
+  useEffect(() => {
+    if (!storageKey || !filtersHydrated) return
+    const payload: StoredFilters = {
+      categoryFilter,
+      supplierRegionFilter,
+      procurementMethodFilter,
+      dateRange:
+        dateRange?.from || dateRange?.to
+          ? {
+              from: dateRange?.from ? toISODate(dateRange.from) : null,
+              to: dateRange?.to ? toISODate(dateRange.to) : null,
+            }
+          : null,
+    }
+    localStorage.setItem(storageKey, JSON.stringify(payload))
+  }, [
+    storageKey,
+    filtersHydrated,
+    categoryFilter,
+    supplierRegionFilter,
+    procurementMethodFilter,
+    dateRange,
+  ])
 
   const { data: categories = [] } = useQuery({
     ...getSteCategoriesOptions({ query: { query: debouncedSearch } }),
@@ -302,7 +379,8 @@ export function QueryPage() {
       <LinkedContractsSheet
         contracts={linkedContracts}
         appName={app?.name ?? ""}
-        queryText={queryText}
+        appId={numAppId}
+        queryId={numQueryId}
         onRemove={handleUnlink}
       />
 
