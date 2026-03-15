@@ -12,6 +12,7 @@ import {
   getApplicationsByIdOptions,
   getApplicationsByIdQueryKey,
   getSearchItemsInfiniteOptions,
+  getSearchItemsTrigramInfiniteOptions,
   getSearchCategoriesOptions,
   getContractsSupplierRegionsOptions,
   getContractsProcurementMethodsOptions,
@@ -213,6 +214,28 @@ export function QueryPage() {
       },
       enabled: !!debouncedSearch,
     })
+
+  const {
+    data: trigramData,
+    isLoading: isTrigramLoading,
+    isFetchingNextPage: isFetchingNextTrigramPage,
+    hasNextPage: hasNextTrigramPage,
+    fetchNextPage: fetchNextTrigramPage,
+  } = useInfiniteQuery({
+    ...getSearchItemsTrigramInfiniteOptions({ query: activeQuery }),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, _all, lastPageParam) => {
+      const { total = 0, limit = 20, page = 1 } = lastPage
+      if ((page as number) * (limit as number) >= (total as number))
+        return undefined
+      return (lastPageParam as number) + 1
+    },
+    enabled:
+      !!debouncedSearch &&
+      !isLoading &&
+      !hasNextPage &&
+      (data?.pages[0]?.total ?? -1) === 0,
+  })
 
   const { data: aiData, isLoading: isAiLoading } = useQuery({
     ...getSearchAiItemsOptions({ query: { q: debouncedSearch } }),
@@ -422,6 +445,11 @@ export function QueryPage() {
                 isFetchingNextPage={isFetchingNextPage}
                 hasNextPage={!!hasNextPage}
                 fetchNextPage={fetchNextPage}
+                trigramData={trigramData}
+                isLoadingTrigram={isTrigramLoading}
+                isFetchingNextTrigramPage={isFetchingNextTrigramPage}
+                hasNextTrigramPage={!!hasNextTrigramPage}
+                fetchNextTrigramPage={fetchNextTrigramPage}
                 queryData={currentQuery}
                 appId={numAppId}
                 queryId={numQueryId}

@@ -969,6 +969,67 @@ export type GetSearchItemsResponses = {
 
 export type GetSearchItemsResponse = GetSearchItemsResponses[keyof GetSearchItemsResponses];
 
+export type GetSearchItemsTrigramData = {
+    body?: never;
+    path?: never;
+    query: {
+        page?: number;
+        limit?: number;
+        /**
+         * Поисковый запрос
+         */
+        q: string;
+        /**
+         * Фильтр по категории СТЕ — ограничивает выдачу (можно несколько: ?category=A&category=B)
+         */
+        category?: Array<string>;
+        /**
+         * Фильтр по региону поставщика — влияет на расчёт suggested_items_count (можно несколько)
+         */
+        supplier_region?: Array<string>;
+        /**
+         * Начало периода подписания контракта (YYYY-MM-DD) — влияет на расчёт suggested_items_count
+         */
+        period_from?: string;
+        /**
+         * Конец периода подписания контракта (YYYY-MM-DD) — влияет на расчёт suggested_items_count
+         */
+        period_to?: string;
+        /**
+         * Фильтр по способу закупки — влияет на расчёт suggested_items_count (можно несколько)
+         */
+        procurement_method?: Array<string>;
+    };
+    url: '/search/items-trigram';
+};
+
+export type GetSearchItemsTrigramErrors = {
+    /**
+     * Error
+     */
+    400: Error;
+    /**
+     * Error
+     */
+    500: Error;
+};
+
+export type GetSearchItemsTrigramError = GetSearchItemsTrigramErrors[keyof GetSearchItemsTrigramErrors];
+
+export type GetSearchItemsTrigramResponses = {
+    /**
+     * OK
+     */
+    200: {
+        data?: Array<SearchSteGroup>;
+        total?: number;
+        page?: number;
+        limit?: number;
+    };
+};
+
+export type GetSearchItemsTrigramResponse = GetSearchItemsTrigramResponses[keyof GetSearchItemsTrigramResponses];
+
 export type GetSearchSteBySteIdContractsData = {
     body?: never;
     path: {

@@ -3,8 +3,8 @@
 import { type DefaultError, type InfiniteData, infiniteQueryOptions, queryOptions, type UseMutationOptions } from '@tanstack/react-query';
 
 import { client } from '../client.gen';
-import { deleteApplicationsByAppIdQueriesByQueryId, deleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemId, deleteApplicationsById, getApplications, getApplicationsById, getContracts, getContractsBuyerRegions, getContractsById, getContractsByIdItems, getContractsProcurementMethods, getContractsSupplierRegions, getHealth, getSearchAiItems, getSearchCategories, getSearchItems, getSearchSteBySteIdContracts, getSte, getSteById, getSteCategories, type Options, patchApplicationsByAppIdQueriesByQueryId, patchApplicationsById, postApplications, postApplicationsByAppIdQueriesByQueryIdContracts, postApplicationsByIdQueries } from '../sdk.gen';
-import type { DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdData, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdError, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdResponse, DeleteApplicationsByAppIdQueriesByQueryIdData, DeleteApplicationsByAppIdQueriesByQueryIdError, DeleteApplicationsByAppIdQueriesByQueryIdResponse, DeleteApplicationsByIdData, DeleteApplicationsByIdError, DeleteApplicationsByIdResponse, GetApplicationsByIdData, GetApplicationsByIdError, GetApplicationsByIdResponse, GetApplicationsData, GetApplicationsError, GetApplicationsResponse, GetContractsBuyerRegionsData, GetContractsBuyerRegionsError, GetContractsBuyerRegionsResponse, GetContractsByIdData, GetContractsByIdError, GetContractsByIdItemsData, GetContractsByIdItemsError, GetContractsByIdItemsResponse, GetContractsByIdResponse, GetContractsData, GetContractsError, GetContractsProcurementMethodsData, GetContractsProcurementMethodsError, GetContractsProcurementMethodsResponse, GetContractsResponse, GetContractsSupplierRegionsData, GetContractsSupplierRegionsError, GetContractsSupplierRegionsResponse, GetHealthData, GetHealthResponse, GetSearchAiItemsData, GetSearchAiItemsError, GetSearchAiItemsResponse, GetSearchCategoriesData, GetSearchCategoriesError, GetSearchCategoriesResponse, GetSearchItemsData, GetSearchItemsError, GetSearchItemsResponse, GetSearchSteBySteIdContractsData, GetSearchSteBySteIdContractsError, GetSearchSteBySteIdContractsResponse, GetSteByIdData, GetSteByIdError, GetSteByIdResponse, GetSteCategoriesData, GetSteCategoriesError, GetSteCategoriesResponse, GetSteData, GetSteError, GetSteResponse, PatchApplicationsByAppIdQueriesByQueryIdData, PatchApplicationsByAppIdQueriesByQueryIdError, PatchApplicationsByAppIdQueriesByQueryIdResponse, PatchApplicationsByIdData, PatchApplicationsByIdError, PatchApplicationsByIdResponse, PostApplicationsByAppIdQueriesByQueryIdContractsData, PostApplicationsByAppIdQueriesByQueryIdContractsError, PostApplicationsByAppIdQueriesByQueryIdContractsResponse, PostApplicationsByIdQueriesData, PostApplicationsByIdQueriesError, PostApplicationsByIdQueriesResponse, PostApplicationsData, PostApplicationsError, PostApplicationsResponse } from '../types.gen';
+import { deleteApplicationsByAppIdQueriesByQueryId, deleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemId, deleteApplicationsById, getApplications, getApplicationsById, getContracts, getContractsBuyerRegions, getContractsById, getContractsByIdItems, getContractsProcurementMethods, getContractsSupplierRegions, getHealth, getSearchAiItems, getSearchCategories, getSearchItems, getSearchItemsTrigram, getSearchSteBySteIdContracts, getSte, getSteById, getSteCategories, type Options, patchApplicationsByAppIdQueriesByQueryId, patchApplicationsById, postApplications, postApplicationsByAppIdQueriesByQueryIdContracts, postApplicationsByIdQueries } from '../sdk.gen';
+import type { DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdData, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdError, DeleteApplicationsByAppIdQueriesByQueryIdContractsByContractItemIdResponse, DeleteApplicationsByAppIdQueriesByQueryIdData, DeleteApplicationsByAppIdQueriesByQueryIdError, DeleteApplicationsByAppIdQueriesByQueryIdResponse, DeleteApplicationsByIdData, DeleteApplicationsByIdError, DeleteApplicationsByIdResponse, GetApplicationsByIdData, GetApplicationsByIdError, GetApplicationsByIdResponse, GetApplicationsData, GetApplicationsError, GetApplicationsResponse, GetContractsBuyerRegionsData, GetContractsBuyerRegionsError, GetContractsBuyerRegionsResponse, GetContractsByIdData, GetContractsByIdError, GetContractsByIdItemsData, GetContractsByIdItemsError, GetContractsByIdItemsResponse, GetContractsByIdResponse, GetContractsData, GetContractsError, GetContractsProcurementMethodsData, GetContractsProcurementMethodsError, GetContractsProcurementMethodsResponse, GetContractsResponse, GetContractsSupplierRegionsData, GetContractsSupplierRegionsError, GetContractsSupplierRegionsResponse, GetHealthData, GetHealthResponse, GetSearchAiItemsData, GetSearchAiItemsError, GetSearchAiItemsResponse, GetSearchCategoriesData, GetSearchCategoriesError, GetSearchCategoriesResponse, GetSearchItemsData, GetSearchItemsError, GetSearchItemsResponse, GetSearchItemsTrigramData, GetSearchItemsTrigramError, GetSearchItemsTrigramResponse, GetSearchSteBySteIdContractsData, GetSearchSteBySteIdContractsError, GetSearchSteBySteIdContractsResponse, GetSteByIdData, GetSteByIdError, GetSteByIdResponse, GetSteCategoriesData, GetSteCategoriesError, GetSteCategoriesResponse, GetSteData, GetSteError, GetSteResponse, PatchApplicationsByAppIdQueriesByQueryIdData, PatchApplicationsByAppIdQueriesByQueryIdError, PatchApplicationsByAppIdQueriesByQueryIdResponse, PatchApplicationsByIdData, PatchApplicationsByIdError, PatchApplicationsByIdResponse, PostApplicationsByAppIdQueriesByQueryIdContractsData, PostApplicationsByAppIdQueriesByQueryIdContractsError, PostApplicationsByAppIdQueriesByQueryIdContractsResponse, PostApplicationsByIdQueriesData, PostApplicationsByIdQueriesError, PostApplicationsByIdQueriesResponse, PostApplicationsData, PostApplicationsError, PostApplicationsResponse } from '../types.gen';
 
 export type QueryKey<TOptions extends Options> = [
     Pick<TOptions, 'baseUrl' | 'body' | 'headers' | 'path' | 'query'> & {
@@ -582,6 +582,51 @@ export const getSearchItemsInfiniteOptions = (options: Options<GetSearchItemsDat
         return data;
     },
     queryKey: getSearchItemsInfiniteQueryKey(options)
+});
+
+export const getSearchItemsTrigramQueryKey = (options: Options<GetSearchItemsTrigramData>) => createQueryKey('getSearchItemsTrigram', options);
+
+/**
+ * Триграммный поиск СТЕ (pg_trgm)
+ */
+export const getSearchItemsTrigramOptions = (options: Options<GetSearchItemsTrigramData>) => queryOptions<GetSearchItemsTrigramResponse, GetSearchItemsTrigramError, GetSearchItemsTrigramResponse, ReturnType<typeof getSearchItemsTrigramQueryKey>>({
+    queryFn: async ({ queryKey, signal }) => {
+        const { data } = await getSearchItemsTrigram({
+            ...options,
+            ...queryKey[0],
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getSearchItemsTrigramQueryKey(options)
+});
+
+export const getSearchItemsTrigramInfiniteQueryKey = (options: Options<GetSearchItemsTrigramData>): QueryKey<Options<GetSearchItemsTrigramData>> => createQueryKey('getSearchItemsTrigram', options, true);
+
+/**
+ * Триграммный поиск СТЕ (pg_trgm)
+ */
+export const getSearchItemsTrigramInfiniteOptions = (options: Options<GetSearchItemsTrigramData>) => infiniteQueryOptions<GetSearchItemsTrigramResponse, GetSearchItemsTrigramError, InfiniteData<GetSearchItemsTrigramResponse>, QueryKey<Options<GetSearchItemsTrigramData>>, number | Pick<QueryKey<Options<GetSearchItemsTrigramData>>[0], 'body' | 'headers' | 'path' | 'query'>>(
+// @ts-ignore
+{
+    queryFn: async ({ pageParam, queryKey, signal }) => {
+        // @ts-ignore
+        const page: Pick<QueryKey<Options<GetSearchItemsTrigramData>>[0], 'body' | 'headers' | 'path' | 'query'> = typeof pageParam === 'object' ? pageParam : {
+            query: {
+                page: pageParam
+            }
+        };
+        const params = createInfiniteParams(queryKey, page);
+        const { data } = await getSearchItemsTrigram({
+            ...options,
+            ...params,
+            signal,
+            throwOnError: true
+        });
+        return data;
+    },
+    queryKey: getSearchItemsTrigramInfiniteQueryKey(options)
 });
 
 export const getSearchSteBySteIdContractsQueryKey = (options: Options<GetSearchSteBySteIdContractsData>) => createQueryKey('getSearchSteBySteIdContracts', options);
