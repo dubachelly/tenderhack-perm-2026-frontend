@@ -269,6 +269,10 @@ export function ApplicationPage() {
     })
   }, [positions])
 
+  const totalNmck = useMemo(() => {
+    return positions.reduce((sum, p) => sum + getPositionPrice(p), 0)
+  }, [positions, positionMeta])
+
   const handleDownload = async () => {
     if (!app) return
     setIsDownloading(true)
@@ -600,10 +604,21 @@ export function ApplicationPage() {
         </div>
       )}
 
+      {totalNmck > 0 && (
+        <div className="fixed right-0 bottom-0 left-0 z-40 border-t bg-background/95 px-6 py-3 backdrop-blur">
+          <div className="mx-auto flex max-w-6xl items-center justify-end gap-2 text-sm">
+            <span className="text-muted-foreground">Итоговая НМЦК заявки:</span>
+            <span className="text-base font-semibold tabular-nums">
+              {formatCurrency(totalNmck)}
+            </span>
+          </div>
+        </div>
+      )}
+
       <Link
         title="Добавить позицию в заявку"
         to={`/?appId=${numAppId}`}
-        className="fixed right-6 bottom-6 z-50 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-opacity hover:opacity-90"
+        className="fixed right-6 bottom-16 z-50 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-opacity hover:opacity-90"
       >
         <Plus className="size-6" />
       </Link>

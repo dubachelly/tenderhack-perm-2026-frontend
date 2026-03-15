@@ -333,13 +333,14 @@ export function QueryPage() {
                   </span>
                 )}
               </TabsTrigger>
-              <TabsTrigger value="ai" className="data-[state=active]:text-purple-600 data-[state=inactive]:text-purple-400">
+              <TabsTrigger
+                value="ai"
+                className="data-[state=active]:text-purple-600 data-[state=inactive]:text-purple-400"
+              >
                 <Star className="mr-1 size-3.5" />
                 AI-подбор
                 {!isAiLoading && aiData?.data && aiData.data.length > 0 && (
-                  <span className="ml-1.5 text-xs">
-                    {aiData.data.length}
-                  </span>
+                  <span className="ml-1.5 text-xs">{aiData.data.length}</span>
                 )}
               </TabsTrigger>
             </TabsList>
@@ -372,7 +373,9 @@ export function QueryPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Регион поставщика</p>
+                    <p className="text-xs text-muted-foreground">
+                      Регион поставщика
+                    </p>
                     <MultiSelectCombobox
                       items={supplierRegions as string[]}
                       value={supplierRegionFilter}
@@ -382,7 +385,9 @@ export function QueryPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Способ закупки</p>
+                    <p className="text-xs text-muted-foreground">
+                      Способ закупки
+                    </p>
                     <MultiSelect
                       items={procurementMethods as string[]}
                       value={procurementMethodFilter}
@@ -391,7 +396,9 @@ export function QueryPage() {
                     />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs text-muted-foreground">Период заключения</p>
+                    <p className="text-xs text-muted-foreground">
+                      Период заключения
+                    </p>
                     <DateRangePicker
                       value={dateRange}
                       onChange={setDateRange}
