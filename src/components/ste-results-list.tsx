@@ -18,6 +18,7 @@ interface SteResultsListProps {
   onLink: (contractId: number) => void
   onUnlink: (contractId: number) => void
   linkingId: number | null
+  tooShort?: boolean
 }
 
 export function SteResultsList({
@@ -30,6 +31,7 @@ export function SteResultsList({
   onLink,
   onUnlink,
   linkingId,
+  tooShort,
 }: SteResultsListProps) {
   const linkedContractIds = new Set(queryData?.contracts?.map((c) => c.contractItemId).filter((id): id is number => id !== undefined))
 
@@ -56,8 +58,14 @@ export function SteResultsList({
   if (!isLoading && items.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-        <p className="text-sm">Ничего не найдено</p>
-        <p className="mt-1 text-xs">Попробуйте изменить поисковый запрос</p>
+        {tooShort ? (
+          <p className="text-sm">Введите не менее 3 символов</p>
+        ) : (
+          <>
+            <p className="text-sm">Ничего не найдено</p>
+            <p className="mt-1 text-xs">Попробуйте изменить поисковый запрос</p>
+          </>
+        )}
       </div>
     )
   }

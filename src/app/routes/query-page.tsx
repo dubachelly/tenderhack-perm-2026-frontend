@@ -375,7 +375,8 @@ export function QueryPage() {
               )}
             <SteResultsList
               data={data}
-              isLoading={isLoading}
+              isLoading={isLoading && !(searchInput.trim().length > 0 && searchInput.trim().length < 3)}
+              tooShort={searchInput.trim().length > 0 && searchInput.trim().length < 3}
               isFetchingNextPage={isFetchingNextPage}
               hasNextPage={!!hasNextPage}
               fetchNextPage={fetchNextPage}
