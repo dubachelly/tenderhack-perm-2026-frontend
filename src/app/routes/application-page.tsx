@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import { Link, useParams } from "react-router"
 import { useQuery } from "@tanstack/react-query"
-import { Download, Pencil, TableOfContentsIcon } from "lucide-react"
+import { Download, Pencil, Plus, TableOfContentsIcon } from "lucide-react"
 
 import { getApplicationsByIdOptions } from "@/shared/api/autogen/@tanstack/react-query.gen"
 import type { ApplicationQueryContractWithContract } from "@/shared/api/autogen/types.gen"
@@ -68,10 +68,18 @@ export function ApplicationPage() {
   const [positionMeta, setPositionMeta] = useState<
     Record<number, PositionMeta>
   >({})
-  const [editingQuantityId, setEditingQuantityId] = useState<number | null>(null)
-  const [quantityDrafts, setQuantityDrafts] = useState<Record<number, string>>({})
-  const [editingManualNmckId, setEditingManualNmckId] = useState<number | null>(null)
-  const [manualNmckDrafts, setManualNmckDrafts] = useState<Record<number, string>>({})
+  const [editingQuantityId, setEditingQuantityId] = useState<number | null>(
+    null
+  )
+  const [quantityDrafts, setQuantityDrafts] = useState<Record<number, string>>(
+    {}
+  )
+  const [editingManualNmckId, setEditingManualNmckId] = useState<number | null>(
+    null
+  )
+  const [manualNmckDrafts, setManualNmckDrafts] = useState<
+    Record<number, string>
+  >({})
 
   const { data: app, isLoading } = useQuery(
     getApplicationsByIdOptions({ path: { id: numAppId } })
@@ -100,9 +108,7 @@ export function ApplicationPage() {
 
   const getQuantity = (positionId: number) => {
     const qty = positionMeta[positionId]?.quantity
-    return typeof qty === "number" && Number.isFinite(qty) && qty > 0
-      ? qty
-      : 1
+    return typeof qty === "number" && Number.isFinite(qty) && qty > 0 ? qty : 1
   }
 
   const getManualNmck = (positionId: number) => {
@@ -191,7 +197,10 @@ export function ApplicationPage() {
       manualNmck: normalized,
     })
     setPositionMeta((prev) => ({ ...prev, [positionId]: next }))
-    setManualNmckDrafts((prev) => ({ ...prev, [positionId]: String(normalized) }))
+    setManualNmckDrafts((prev) => ({
+      ...prev,
+      [positionId]: String(normalized),
+    }))
     setEditingManualNmckId(null)
   }
 
@@ -289,14 +298,15 @@ export function ApplicationPage() {
             disabled={isDownloading || !hasReportablePositions}
           >
             <Download className="mr-2 size-4" />
-            Сформировать отчёт
+            Скачать отчёт
           </Button>
         </div>
       </div>
 
       {missingPositions > 0 && (
         <p className="mb-4 text-xs text-muted-foreground">
-          Позиции без привязанных контрактов попадут в отчёт, если задана ручная НМЦК.
+          Позиции без привязанных контрактов попадут в отчёт, если задана ручная
+          НМЦК.
         </p>
       )}
 
@@ -477,6 +487,14 @@ export function ApplicationPage() {
           })}
         </div>
       )}
+
+      <Link
+        title="Добавить позицию в заявку"
+        to={`/?appId=${numAppId}`}
+        className="fixed right-6 bottom-6 z-50 flex size-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-opacity hover:opacity-90"
+      >
+        <Plus className="size-6" />
+      </Link>
     </div>
   )
 }
