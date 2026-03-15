@@ -69,10 +69,14 @@ export function SteCard({
             )}
             {item.ste_manufacturer && (
               <Badge variant="outline">
-                {item.ste_manufacturer.replace(
-                  /общество с ограниченной ответственностью/gi,
-                  "ООО"
-                )}
+                {item.ste_manufacturer
+                  .replace(/общество с ограниченной ответственностью/gi, "ООО")
+                  .replace(/закрытое акционерное общество/gi, "ЗАО")
+                  .replace(/открытое акционерное общество/gi, "ОАО")
+                  .replace(/публичное акционерное общество/gi, "ПАО")
+                  .replace(/акционерное общество/gi, "АО")
+                  .replace(/федеральное государственное унитарное предприятие/gi, "ФГУП")
+                  .replace(/федеральное каз[её]нное предприятие/gi, "ФКП")}
               </Badge>
             )}
             <span
